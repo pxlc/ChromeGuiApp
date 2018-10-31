@@ -4,7 +4,7 @@ The goal of this project is to allow for the fast creation of attractive, dynami
 
 A strong secondary goal of this project is to provide an easy-to-work-with framework/library that has a very small number of dependencies, and that is simple to set up and use.
 
-All you need is Python 2.7.x or 3.x.x and the Chrome (or Chromium) browser installed. You will also need to install the **`jinja`** Python package into your install of Python.
+All you need is Python 2.7.x or 3.x.x and the Chrome (or Chromium) browser installed. You will also need to install the **`jinja2`** Python package into your install of Python.
 
 
 ## Highlights
