@@ -1,4 +1,4 @@
-# Using a PyChrome App in Maya
+# How to use a ChromeGuiApp in Maya
 
 ## Example Usage
 
