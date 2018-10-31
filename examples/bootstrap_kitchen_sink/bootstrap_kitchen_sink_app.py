@@ -34,10 +34,9 @@ import chromegui
 
 class ChromeGuiApp(chromegui.ChromeGuiAppBase):
 
-    def __init__(self, port_num, app_short_name, app_title_label, app_dir_path, start_html_filename,
-                 width=480, height=600):
+    def __init__(self, app_short_name, app_title_label, app_dir_path, start_html_filename, width=480, height=600):
 
-        super(ChromeGuiApp, self).__init__(port_num, app_short_name, app_title_label, app_dir_path, width, height)
+        super(ChromeGuiApp, self).__init__(app_short_name, app_title_label, app_dir_path, width, height)
 
         self.start_html_fname = start_html_filename
 

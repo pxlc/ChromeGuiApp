@@ -10,26 +10,34 @@ import multiprocessing
 from . import util
 from .websocket import WebsocketServer
 from .get_js import get_js_file_url
+from .config import load_config_file
+from .util import get_next_port_num
+
+CHROMEGUI_ROOT = '/'.join(os.path.realpath(__file__).replace('\\','/').split('/')[:-2])
 
 
 class ChromeGuiAppBase(object):
 
     JS_FILE_URL = get_js_file_url()
 
-    def __init__(self, port_num, app_short_name, app_title_label, app_dir_path, width=480, height=600):
+    def __init__(self, app_short_name, app_title_label, app_dir_path, width=480, height=600, config_filepath=None):
+
+        self.config = load_config_file(config_filepath)
 
         self.user = getpass.getuser()
         self.app_short_name = app_short_name
         self.app_title_label = app_title_label
         self.app_dir_path = app_dir_path
 
-        self.port = port_num
+        self.port = get_next_port_num(self.config)
 
         self.session_start_dt_str = util.now_datetime_str('compact')
         self.session_id = '{a}_{u}_{dt}'.format(a=self.app_short_name, u=self.user, dt=self.session_start_dt_str)
 
         self.log_file = util.get_app_session_logfile(app_short_name, folder_pre='_',
-                                                     dt_str=self.session_start_dt_str[:-3])
+                                                     dt_str=self.session_start_dt_str[:-3],
+                                                     temp_root=self.config.get('user_temp_root',os.getenv('TEMP')))
+
         self.session_file_path_pre = self.log_file.replace('.log', '')
         self.session_temp_dir_path = os.path.dirname(self.log_file)
 
@@ -153,7 +161,8 @@ class ChromeGuiAppBase(object):
         }
         chrome_exe_path = chrome_path_by_platform.get(sys.platform, '')
 
-        chrome_data_dir = os.path.join(os.getenv('TEMP',''), '_chrome_app_user_data')
+        chrome_data_dir = os.path.join(self.config.get('user_temp_root', os.getenv('TEMP')),
+                                       '_chrome_app_user_data')
         cmd_arr = [
             chrome_exe_path,
             '--allow-file-access-from-files',

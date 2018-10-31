@@ -32,8 +32,7 @@ import traceback
 def usage():
 
     print('')
-    print('  Usage: python {0} <app_module_path> <start_html_filename> <port_num> <maya_port_num>'.format(
-            sys.argv[0]))
+    print('  Usage: python {0} <app_module_path> <start_html_filename> <maya_port_num>'.format(sys.argv[0]))
     print('')
 
 
@@ -41,9 +40,9 @@ if __name__ == '__main__':
 
     try:
         args = sys.argv[1:]
-        if len(args) != 4:
+        if len(args) != 3:
             print('')
-            print('*** ERROR: expecting 4 arguments ...')
+            print('*** ERROR: expecting 3 arguments ...')
             usage()
             sys.exit(1)
 
@@ -51,8 +50,8 @@ if __name__ == '__main__':
         app_dir_path = os.path.dirname(os.path.realpath(args[0])).replace('\\', '/')
 
         start_html_filename = args[1]
-        PORT = int(args[2])
-        MAYA_PORT = int(args[3])
+
+        MAYA_PORT = int(args[2])
 
         cap_words = [ w.capitalize() for w in app_module_name.replace('_app.py','').replace('.py','').split('_') ]
         app_code = ''.join(cap_words)
@@ -62,12 +61,11 @@ if __name__ == '__main__':
         import_stmt = 'import {0} as app_module'.format(app_module_name)
         exec(import_stmt)
 
-        app = app_module.MayaChromeGuiApp(PORT, MAYA_PORT, app_code, '{0} - Chrome App'.format(default_app_title),
+        app = app_module.MayaChromeGuiApp(MAYA_PORT, app_code, '{0} - Chrome App'.format(default_app_title),
                                           app_dir_path, start_html_filename, width=800, height=600)
-
         app.launch()
 
     except:
-        open('A:/maquino/maya_test_err.txt', 'w').write(traceback.format_exc())
+        open('C:/TEMP/maya_test_err.txt', 'w').write(traceback.format_exc())
 
 

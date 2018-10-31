@@ -39,11 +39,9 @@ import chromegui
 
 class MayaChromeGuiApp(chromegui.MayaChromeGuiAppBase):
 
-    def __init__(self, port_num, maya_port_num, app_short_name, app_title_label, app_dir_path, start_html_filename,
-                 width=480, height=600):
+    def __init__(self, app_short_name, app_title_label, app_dir_path, start_html_filename, width=480, height=600):
 
-        super(MayaChromeGuiApp, self).__init__(port_num, maya_port_num, app_short_name, app_title_label,
-                                               app_dir_path, width, height)
+        super(MayaChromeGuiApp, self).__init__(app_short_name, app_title_label, app_dir_path, width, height)
 
         self.start_html_fname = start_html_filename
 

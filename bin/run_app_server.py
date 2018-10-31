@@ -31,17 +31,16 @@ import logging
 def usage():
 
     print('')
-    print('  Usage: python {} <app_module_path> <start_html_filename> <port_num> [ <config_path> ]'.format(
-            sys.argv[0]))
+    print('  Usage: python {} <app_module_path> <start_html_filename> [ <config_path> ]'.format(sys.argv[0]))
     print('')
 
 
 if __name__ == '__main__':
 
     args = sys.argv[1:]
-    if len(args) < 3:
+    if len(args) < 2:
         print('')
-        print('*** ERROR: expecting 3 or 4 arguments ...')
+        print('*** ERROR: expecting 2 or 3 arguments ...')
         usage()
         sys.exit(1)
 
@@ -49,10 +48,9 @@ if __name__ == '__main__':
     app_dir_path = os.path.dirname(os.path.realpath(args[0])).replace('\\', '/')
 
     start_html_filename = args[1]
-    PORT = int(args[2])
 
-    if len(args) == 4:
-        config_path = args[3]
+    if len(args) == 3:
+        config_path = args[2]
 
     cap_words = [ w.capitalize() for w in app_module_name.replace('_app.py','').replace('.py','').split('_') ]
     app_code = ''.join(cap_words)
@@ -62,8 +60,7 @@ if __name__ == '__main__':
     import_stmt = 'import {0} as app_module'.format(app_module_name)
     exec(import_stmt)
 
-    app = app_module.ChromeGuiApp(PORT, app_code, '{0} - Chrome App'.format(default_app_title),
-                                  app_dir_path, start_html_filename, width=800, height=600)
-
+    app = app_module.ChromeGuiApp(app_code, '{0} - Chrome App'.format(default_app_title), app_dir_path,
+                                  start_html_filename, width=800, height=600)
     app.launch()
 

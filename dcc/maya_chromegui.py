@@ -29,14 +29,16 @@ import subprocess
 
 import maya.cmds as mc
 
-PYCHROME_ROOT = os.path.sep.join( os.path.realpath(__file__).replace('\\','/').split('/')[:-2] )
-MAYA_APP_RUNNER_SCRIPT = os.path.sep.join( [PYCHROME_ROOT, 'bin', 'run_maya_app_server.py'] )
+CHROMEGUI_ROOT = os.path.sep.join( os.path.realpath(__file__).replace('\\','/').split('/')[:-2] )
+MAYA_APP_RUNNER_SCRIPT = os.path.sep.join( [CHROMEGUI_ROOT, 'bin', 'run_maya_app_server.py'] )
+
+sys.path.append(CHROMEGUI_ROOT)
+import chromegui
 
 
-def launch_pychrome_maya_gui(app_module_path, start_html_file):
+def launch_pychrome_maya_gui(app_module_path, start_html_file, config_filepath=None):
 
-    PORT = 9000
-    MAYA_PORT = 9010
+    MAYA_PORT = chromegui.get_next_port_num( load_config_file(config_filepath) )
 
     maya_port_name = ':%s' % MAYA_PORT
     if maya_port_name not in mc.commandPort(listPorts=True, q=True):
@@ -51,7 +53,7 @@ def launch_pychrome_maya_gui(app_module_path, start_html_file):
         subprocess_flags = 0
             
     cmd_and_args = ['C:/Program Files/Python27/python.exe', MAYA_APP_RUNNER_SCRIPT, app_module_path,
-                    start_html_file, str(PORT), str(MAYA_PORT)]
+                    start_html_file, str(MAYA_PORT)]
     DEBUG = True
     if DEBUG:
         subprocess.Popen(cmd_and_args)

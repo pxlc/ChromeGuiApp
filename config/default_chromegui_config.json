@@ -1,0 +1,31 @@
+{
+    "#": "This configuration data file is provided under the MIT open source license -- see LICENSE file",
+    "#": "for this project for further details. Copyright (C)2018 pxlc@github",
+    "#": "",
+
+    "user_info_cache": {
+        "_type_": "single_path_create",
+        "win32": [
+            "${HOME}/.pxlc_ChromeGuiApp",
+            "${USERPROFILE}/AppData/Local/pxlc_ChromeGuiApp"
+        ],
+        "default": [ "${HOME}/.pxlc_ChromeGuiApp" ]
+    },
+    "user_temp_root": {
+        "_type_": "single_path_create",
+        "win32": [
+            "${TEMP}/pxlc_ChromeGuiApp_temp_${USERNAME}",
+            "${USERPROFILE}/AppData/Local/Temp/pxlc_ChromeGuiApp_temp"
+        ],
+        "default": [ "/usr/tmp/pxlc_ChromeGuiApp_temp_${USER}" ]
+    },
+
+    "port_cycle_range": {"start": 40000, "end": 42000},
+
+    "pythonpath_additions": {
+        "_type_": "multi_path",
+        "win32": [
+        ],
+        "default": []
+    }
+}
