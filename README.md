@@ -11,7 +11,7 @@ All you need is Python 2.7.x or 3.x.x and the Chrome (or Chromium) browser insta
 
 * No dependency on non-built-in Python packages (examples provided require `jinja2`)
 * Supported for Python 2.7 and Python 3.x (and may actually work for Python 2.6 ... just haven't tried it yet)
-* Tested in Python 2.7.15 and Python 3.7.0
+* Tested in Python 2.7.15 and Python 3.7.0 (and only tested on Windows 10 so far)
 
 ## Requirements
 
