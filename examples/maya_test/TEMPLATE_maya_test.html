@@ -1,0 +1,254 @@
+<html>
+
+<!--
+--------------------------------------------------------------------------------
+ MIT License
+
+ Copyright (c) 2018 pxlc@github
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.
+--------------------------------------------------------------------------------
+-->
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>{{ WIN_TITLE }}</title>
+
+    <style>
+        .button {
+            color: white;
+            background-color: #333399;
+            border-radius: 4px;
+            padding: 4px;
+            text-align: center;
+            width: 200px;
+            cursor: pointer;
+        }
+
+        .ang_data_var {
+            color: #888888;
+            border-radius: 4px;
+            padding: 4px;
+            text-align: center;
+            width: 250px;
+        }
+    </style>
+
+<link rel="icon" 
+      type="image/ico" 
+      href="file:///{{ APP_DIR_PATH }}/bootstrap_logo.png">
+
+<!-- [ Bootstrap ] -->
+<link href="https://bootswatch.com/4/slate/bootstrap.css" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
+
+<!-- [ ChromeGui JS ] -->
+<script type="text/javascript" src="{{ CHROMEGUI_JS_URL }}"></script>
+
+<script type="text/javascript">
+
+//
+// chromegui
+//
+var g_SESSION_ID = "{{ SESSION_ID }}";
+var g_connection_made = false;
+
+function pyprint( message ) {
+    chromegui.to_python("print_message", {"message": "" + message});
+}
+
+function data_receiver( data ) {
+    if (data.op == "message") {
+        if (data.data.msg == "connection established") {
+            g_connection_made = false;
+        }
+        else {
+            alert(data.data.msg);
+        }
+        return
+    }
+    var op = data.op;
+    var op_data = data.data;
+    var received_session_id = data.session_id;
+
+    if (received_session_id != g_SESSION_ID ) {
+        // TODO: warn user?
+        return;
+    }
+
+    // check op to see what to do with the op_data
+}
+
+function init() {
+    setTimeout(function() {
+        chromegui.init("{{ SESSION_ID }}", {{ PORT }}, pyprint, data_receiver);
+    }, 2000);
+}
+
+function on_close_click() {
+    chromegui.close();
+    open(location, '_self').close(); // this allows the Chrome app window to close itself! Hurray!
+    // return false;
+}
+
+function form_go() {
+    var form_el = document.getElementById("MyForm");
+    var field_el_list = form_el.querySelectorAll(".form-control");
+    var checkbox_el_list = form_el.querySelectorAll(".form-check-input");
+
+    var form_data = {};
+
+    for (var c=0; c < field_el_list.length; c++) {
+        var field_el = field_el_list[c];
+        form_data[field_el.id] = field_el.value;
+    }
+
+    for (var c=0; c < checkbox_el_list.length; c++) {
+        var checkbox_el = checkbox_el_list[c];
+        form_data[checkbox_el.id] = checkbox_el.checked;
+    }
+
+    chromegui.to_python("user_info_submit", form_data);
+    alert("Form submitted!");
+}
+
+</script>
+
+<style>
+div.top_pad {
+    margin-top: 10px;
+}
+</style>
+
+</head>
+
+<body onload="init();" onunload="chromegui.close();">
+
+    <div class="container">
+        <h2>Submit User Information</h2>
+    </div>
+
+    <div class="container top_pad">
+
+<form id="MyForm">
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label for="inputEmail4">Email</label>
+      <input type="email" class="form-control" id="inputEmail4" placeholder="Email">
+    </div>
+    <div class="form-group col-md-6">
+      <label for="inputPassword4">Password</label>
+      <input type="password" class="form-control" id="inputPassword4" placeholder="Password">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="inputAddress">Address</label>
+    <input type="text" class="form-control" id="inputAddress" placeholder="1234 Main St">
+  </div>
+  <div class="form-group">
+    <label for="inputAddress2">Address 2</label>
+    <input type="text" class="form-control" id="inputAddress2" placeholder="Apartment, studio, or floor">
+  </div>
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label for="inputCity">City</label>
+      <input type="text" class="form-control" id="inputCity">
+    </div>
+    <div class="form-group col-md-4">
+      <label for="inputState">State</label>
+      <select id="inputState" class="form-control">
+        <option selected>Choose...</option>
+        <option>...</option>
+      </select>
+    </div>
+    <div class="form-group col-md-2">
+      <label for="inputZip">Zip</label>
+      <input type="text" class="form-control" id="inputZip">
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" id="gridCheck">
+      <label class="form-check-label" for="gridCheck">
+        Check me out
+      </label>
+    </div>
+  </div>
+  <button type="button" class="btn btn-secondary" onclick="form_go()">Okay Go</button>
+</form>
+
+    </div>
+
+    <!-- Load any external 3rd party JavaScript libraries -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.5/angular.min.js"></script>
+
+<!-- In-line JavaScript code for this page -->
+<script language="JavaScript">
+// --- START of JavaScript -------------------------------------------------------------------
+
+function getEl( selector_str ) {
+    return document.querySelector( selector_str );
+}
+
+function getElAll( selector_str ) {
+    return document.querySelectorAll( selector_str );
+}
+
+function isDefined( var_to_test ) {
+    if( typeof var_to_test === 'undefined' )
+        return false;
+    return true;
+}
+
+function zeroFill( number, width, truncate_type )
+{
+    var zero_arr = [];
+
+    var num_str = number.toString();
+    var w_delta = width - num_str.length;
+
+    if ( w_delta > 0 ) {
+        for( var c=0; c < w_delta; c++ ) { zero_arr.push('0'); }
+        return ( zero_arr.join('') + num_str );
+    }
+    else if( w_delta == 0 ) {
+        return num_str;
+    }
+
+    if( isDefined( truncate_type ) ) {
+        if( truncate_type == 'keep_right' ) {
+            return num_str.slice( (0 - width), num_str.length );
+        }
+        else if( truncate_type == 'keep_left' ) {
+            return num_str.slice( 0, width );
+        }
+    }
+    return num_str;
+}
+
+// --- END of JavaScript -------------------------------------------------------------------
+</script>
+
+</body>
+
+</html>
+
