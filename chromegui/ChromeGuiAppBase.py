@@ -23,7 +23,7 @@ class ChromeGuiAppBase(object):
     JS_FILE_URL = get_js_file_url()
 
     def __init__(self, app_short_name, app_title_label, app_dir_path, width=480, height=600,
-                 config_filepath='', log_to_shell=False, template_dirpath=''):
+                 config_filepath='', log_to_shell=False, log_level_str='', template_dirpath=''):
 
         self.config = load_config_file(config_filepath)
 
@@ -48,11 +48,18 @@ class ChromeGuiAppBase(object):
         if not os.path.isdir(log_dirpath):
             os.makedirs(log_dirpath)
 
-        # self.logger = logging.getLogger('{a}{dt}'.format(a=self.app_short_name,
-        #                                                  dt=self.session_start_dt_str.replace('_','')))
-        self.logger = logging.getLogger()
-        self.logger.setLevel( logging.DEBUG )
-        util.setup_logger(self.logger, self.log_file, log_to_shell)
+        log_level_map = {
+            'DEBUG': logging.DEBUG, 'INFO': logging.INFO, 'WARNING': logging.WARNING, 'ERROR': logging.ERROR,
+            'CRITICAL': logging.CRITICAL
+        }
+        log_level = logging.ERROR
+        if log_level_str in log_level_map:
+            log_level = log_level_map.get(log_level_str)
+
+        self.logger = logging.getLogger('{a}{dt}'.format(a=self.app_short_name,
+                                                         dt=self.session_start_dt_str.replace('_','')))
+        self.logger.setLevel( log_level )
+        util.setup_logger(self.logger, self.log_file, log_level, log_to_shell=log_to_shell)
 
         self.session_file_path_pre = self.log_file.replace('.log', '')
         self.session_temp_dir_path = os.path.dirname(self.log_file)

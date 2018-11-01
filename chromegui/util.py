@@ -6,17 +6,19 @@ import getpass
 import logging
 
 
-def setup_logger(logger, log_filepath, log_to_shell=False):
+def setup_logger(logger, log_filepath, logging_level, log_to_shell=False):
 
     log_formatter = logging.Formatter("%(asctime)s [%(levelname)-5.5s]:  %(message)s")
 
     file_handler = logging.FileHandler(log_filepath)
+    file_handler.setLevel(logging_level)
     file_handler.setFormatter(log_formatter)
 
     logger.addHandler(file_handler)
 
     if log_to_shell:
         console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setLevel(logging_level)
         console_handler.setFormatter(log_formatter)
 
         logger.addHandler(console_handler)

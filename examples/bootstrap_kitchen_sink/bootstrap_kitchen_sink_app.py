@@ -25,7 +25,6 @@
 import os
 import sys
 import json
-import jinja2
 
 sys.path.append( os.path.sep.join(os.path.realpath(__file__).replace('\\','/').split('/')[:-3]) )
 import chromegui
@@ -34,10 +33,12 @@ import chromegui
 class ChromeGuiApp(chromegui.ChromeGuiAppBase):
 
     def __init__(self, app_short_name, app_title_label, app_dir_path, start_html_filename, width=480, height=600,
-                 config_filepath='', log_to_shell=False, template_dirpath=''):
+                 config_filepath='', log_to_shell=False, log_level_str='', template_dirpath=''):
 
-        super(ChromeGuiApp, self).__init__(app_short_name, app_title_label, app_dir_path, width, height,
-                                           config_filepath, log_to_shell, template_dirpath)
+        super(ChromeGuiApp, self).__init__(app_short_name, app_title_label, app_dir_path, width=width,
+                                           height=height, config_filepath=config_filepath,
+                                           log_to_shell=log_to_shell, log_level_str=log_level_str,
+                                           template_dirpath=template_dirpath)
 
         self.start_html_fname = start_html_filename
         self.extra_template_vars = self._setup_extra_template_vars()
