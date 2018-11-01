@@ -5,7 +5,6 @@ import json
 import ctypes
 import getpass
 import subprocess
-import multiprocessing
 
 from . import util
 from .websocket import WebsocketServer
@@ -179,15 +178,7 @@ class ChromeGuiAppBase(object):
         else:
             subprocess_flags = 0
             
-        # multiprocessing.Process(target=launch_chrome, args=(cmd_arr, subprocess_flags, self,)).start()
         self.chrome_process = subprocess.Popen(cmd_arr, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                                creationflags=subprocess_flags)
         self.ws_server.run_forever()
-
-
-def launch_chrome(cmd_arr, subprocess_flags, chrome_app_runner):
-
-    p = subprocess.Popen(cmd_arr, stdout=subprocess.PIPE, stderr=subprocess.PIPE, creationflags=subprocess_flags)
-    chrome_app_runner.chrome_process = p
-
 
