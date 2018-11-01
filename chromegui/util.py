@@ -3,9 +3,26 @@ import os
 import sys
 import datetime
 import getpass
+import logging
 
 
-def now_datetime_str( format='full', trim_micro=False, two_digit_year=False ):
+def setup_logger(logger, log_filepath, log_to_shell=False):
+
+    log_formatter = logging.Formatter("%(asctime)s [%(levelname)-5.5s]:  %(message)s")
+
+    file_handler = logging.FileHandler(log_filepath)
+    file_handler.setFormatter(log_formatter)
+
+    logger.addHandler(file_handler)
+
+    if log_to_shell:
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setFormatter(log_formatter)
+
+        logger.addHandler(console_handler)
+
+
+def now_datetime_str( format='full', two_digit_year=False ):
 
     # format is 'display', 'full', 'compact', or provided format string
     # %Y%m%d-%H%M%S%f
@@ -25,7 +42,7 @@ def now_datetime_str( format='full', trim_micro=False, two_digit_year=False ):
     hour = bits[idx_map['hr']]
     minute = bits[idx_map['min']]
     second = bits[idx_map['sec']]
-    ms = bits[idx_map['mic']][:3] if trim_micro else bits[idx_map['mic']]
+    ms = bits[idx_map['mic']][:3]
 
     if format == 'compact':
         return '{yr}{mo}{day}_{hr}{m}{s}{ms}'.format(
