@@ -22,17 +22,28 @@ class ChromeGuiAppBase(object):
 
     JS_FILE_URL = get_js_file_url()
 
-    def __init__(self, app_short_name, app_title_label, app_dir_path, width=480, height=600,
-                 config_filepath='', log_to_shell=False, log_level_str='', template_dirpath=''):
+    def __init__(self, app_module_filepath, width=480, height=600, template_dirpath='',
+                 config_filepath='', log_to_shell=False, log_level_str=''):
+
+        self.app_module_filepath = app_module_filepath.replace('\\','/')
+        self.app_dir_path = os.path.dirname(self.app_module_filepath)
+        self.app_module_filename = os.path.basename(self.app_module_filepath)
+
+        cap_words = [ w.capitalize() for w in
+                            self.app_module_filename.replace('_app.py','').replace('.py','').split('_') ]
+
+        self.app_short_name = ''.join(cap_words)
+        self.app_title_label = ' '.join(cap_words)  # default App Title
 
         self.config = load_config_file(config_filepath)
 
         self.user = getpass.getuser()
-        self.app_short_name = app_short_name
-        self.app_title_label = app_title_label
-        self.app_dir_path = app_dir_path
 
-        tmpl_dir_path = template_dirpath if template_dirpath else app_dir_path
+        # self.app_short_name = app_short_name
+        # self.app_title_label = app_title_label
+        # self.app_dir_path = app_dir_path
+
+        tmpl_dir_path = template_dirpath if template_dirpath else self.app_dir_path
         self.j2_template_env = jinja2.Environment(loader=jinja2.FileSystemLoader(tmpl_dir_path))
 
         self.port = get_next_port_num(self.config)
@@ -41,7 +52,7 @@ class ChromeGuiAppBase(object):
         self.session_id = '{a}_{u}_{dt}'.format(a=self.app_short_name, u=self.user, dt=self.session_start_dt_str)
 
         # use session_id as logger name
-        self.log_file = util.get_app_session_logfile(app_short_name, dt_str=self.session_start_dt_str,
+        self.log_file = util.get_app_session_logfile(self.app_short_name, dt_str=self.session_start_dt_str,
                                                      temp_root=self.config.get('user_temp_root',os.getenv('TEMP')))
         # make sure log directory exists
         log_dirpath = os.path.dirname(self.log_file)
@@ -87,6 +98,10 @@ class ChromeGuiAppBase(object):
         self.start_html_fname = ''
         self.extra_template_vars = {}
 
+    def auto_template_filename(self):
+
+        return 'T_{0}.html'.format(self.app_module_filename.replace('_app.py','').replace('.py',''))
+
     def generate_html_file(self, template_filename):
 
         template = self.j2_template_env.get_template(template_filename)
@@ -127,7 +142,7 @@ class ChromeGuiAppBase(object):
 
         if not self.chrome_client:
             self.chrome_client = client
-            msg_obj = {'op': 'message', 'session_id': self.session_id, 'data': {'msg': 'connection established'}}
+            msg_obj = {'op': 'connection_status', 'session_id': self.session_id, 'data': {'status': 'CONNECTED'}}
             self.ws_server.send_message(client, json.dumps(msg_obj))
 
     def clean_up(self):
@@ -175,6 +190,9 @@ class ChromeGuiAppBase(object):
         fn = self.op_handler_info.get(op, {}).get('cb_fn')
         if fn:
             fn(op, op_data)
+
+    def set_app_title(self, title):
+        self.app_title_label = title
 
     def get_app_dir_path(self):
         return self.app_dir_path
