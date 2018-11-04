@@ -4,7 +4,7 @@
 --------------------------------------------------------------------------------
  MIT License
 
- Copyright (c) 2018 pxlc@github
+ Copyright (c) 2018 pxlc
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -54,25 +54,20 @@
       type="image/ico" 
       href="file://{{ RES_ICON_PATH }}/Chromium_GUI_icon_256x256.png">
 
-<!-- [ Tabulator ] -->
 <link href="https://unpkg.com/tabulator-tables@4.0.5/dist/css/tabulator.min.css" rel="stylesheet">
 <script type="text/javascript" src="https://unpkg.com/tabulator-tables@4.0.5/dist/js/tabulator.min.js"></script>
 
-<!-- [ Showdown ] -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.8.7/showdown.js"></script>
 
-<!-- [ Highlight ] -->
 <!-- <link href="https://highlightjs.org/static/demo/styles/an-old-hope.css" rel="stylesheet"> -->
 <link href="https://highlightjs.org/static/demo/styles/atom-one-dark-reasonable.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/languages/python.min.js"></script>
-
-<!-- [ Bootstrap ] -->
-<link href="https://bootswatch.com/4/slate/bootstrap.css" rel="stylesheet">
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-
+<!--
+<script>
+hljs.initHighlightingOnLoad();
+</script>
+-->
 
 <script type="text/javascript" src="{{ CHROMEGUI_JS_URL }}"></script>
 
@@ -162,41 +157,25 @@ function try_markdown() {
 
 </script>
 
-<style>
-div.top_pad {
-    margin-top: 10px;
-}
-</style>
-
 </head>
 
 <body ng-app="AngularApp" onload="init();" onunload="chromegui.close();">
 
     <div id="id_ang_controller" ng-controller="mainCtrl">
 
-        <div class="container">
-            <div>Last added entry: {[ data.last_added_name ]}</div>
-            <div id="example-table"></div>
-        </div>
+        <div>Last added entry: {[ data.last_added_name ]}</div>
+        <div id="example-table"></div>
 
-        <div class="container top_pad">
-            <div class="card" style="width: 18rem;">
-                <img class="card-img-top" src="file:///{{ RES_IMG_PATH }}/Sintel/Sintel_image_still_000411.jpg" alt="Card image cap">
-              <div class="card-body">
-                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-              </div>
-            </div>
+        <div>
+            <button ng-click="do_it()">Add Row</button>
         </div>
-
-        <div class="container top_pad">
-            <button class="btn btn-secondary btn-sm" ng-click="do_it()">Add Row</button>
-            <button class="btn btn-secondary btn-sm" onclick="second_click()">Window something?</button>
-            <button class="btn btn-secondary btn-sm" onclick="try_markdown()">Try Markdown</button>
+        <div>
+            <button onclick="second_click()">Window something?</button>
         </div>
-
-        <div class="container top_pad">
-            <div id="idMarkdownResults">
-            </div>
+        <div>
+            <button onclick="try_markdown()">Try Markdown</button>
+        </div>
+        <div id="idMarkdownResults">
         </div>
 
     </div>

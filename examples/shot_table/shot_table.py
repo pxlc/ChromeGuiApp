@@ -32,22 +32,22 @@ os.environ['PXLC_CHROMEGUI_ROOT'] = os.path.sep.join(os.path.realpath(__file__).
 CHROMEGUI_ROOT = os.getenv('PXLC_CHROMEGUI_ROOT')
 
 sys.path.append(CHROMEGUI_ROOT)
-
 import chromegui
 
 
 class ChromeGuiApp(chromegui.ChromeGuiAppBase):
 
-    def __init__(self, app_short_name, app_title_label, app_dir_path, start_html_filename, width=480, height=600,
-                 config_filepath='', log_to_shell=False, log_level_str='', template_dirpath=''):
+    def __init__(self, app_module_path, width=480, height=600,
+                 start_html_filename='', template_dirpath='', config_filepath='',
+                 log_to_shell=False, log_level_str=''):
 
-        super(ChromeGuiApp, self).__init__(app_short_name, app_title_label, app_dir_path, width=width,
-                                           height=height, config_filepath=config_filepath,
-                                           log_to_shell=log_to_shell, log_level_str=log_level_str,
-                                           template_dirpath=template_dirpath)
+        super(ChromeGuiApp, self).__init__(app_module_path, width=width, height=height,
+                                           template_dirpath=template_dirpath, config_filepath=config_filepath,
+                                           log_to_shell=log_to_shell, log_level_str=log_level_str)
 
-        self.start_html_fname = start_html_filename
+        self.start_html_fname = start_html_filename if start_html_filename else self.auto_template_filename()
 
+        # Set up your app data (and anything you will use for template data) here.
         self.shot_data_list = [
                 {'show': 'pxlc', 'seq_code': 'pxlc_010', 'shot_code': 'pxlc_010_0010', 'status': 'inp',
                     'status_layout': 'appr', 'status_anim': 'rev', 'status_fx': 'na',
@@ -116,8 +116,8 @@ class ChromeGuiApp(chromegui.ChromeGuiAppBase):
 
     def _setup_extra_template_vars(self):
 
-        res_image_path = os.path.realpath( os.path.join( CHROMEGUI_ROOT, 'res/images' ) )
-        res_icon_path = os.path.realpath( os.path.join( CHROMEGUI_ROOT, 'res/icons' ) )
+        res_image_path = os.path.realpath( os.path.join(CHROMEGUI_ROOT, 'res', 'images') )
+        res_icon_path = os.path.realpath( os.path.join(CHROMEGUI_ROOT, 'res', 'icons') )
 
         extra_vars = {
             'RES_IMG_PATH': res_image_path.replace('\\', '/'),
