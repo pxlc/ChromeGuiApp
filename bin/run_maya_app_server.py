@@ -1,7 +1,7 @@
 # -------------------------------------------------------------------------------
 # MIT License
 #
-# Copyright (c) 2018 pxlc@github
+# Copyright (c) 2018 pxlc
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,7 @@ import traceback
 def usage():
 
     print('')
-    print('  Usage: python {0} <app_module_path> <start_html_filename> <maya_port_num>'.format(sys.argv[0]))
+    print('  Usage: python {0} <app_module_path> <maya_port_num>'.format(sys.argv[0]))
     print('')
 
 
@@ -40,29 +40,23 @@ if __name__ == '__main__':
 
     try:
         args = sys.argv[1:]
-        if len(args) != 3:
+        if len(args) != 2:
             print('')
-            print('*** ERROR: expecting 3 arguments ...')
+            print('*** ERROR: expecting 2 arguments ...')
             usage()
             sys.exit(1)
 
-        app_module_name = os.path.basename(args[0]).replace('.py','')
-        app_dir_path = os.path.dirname(os.path.realpath(args[0])).replace('\\', '/')
+        app_module_filepath = os.path.realpath(args[0])
+        app_module_name = os.path.basename(app_module_filepath).replace('.py', '')
+        app_dir_path = os.path.dirname(app_module_filepath)
 
-        start_html_filename = args[1]
-
-        MAYA_PORT = int(args[2])
-
-        cap_words = [ w.capitalize() for w in app_module_name.replace('_app.py','').replace('.py','').split('_') ]
-        app_code = ''.join(cap_words)
-        default_app_title = ' '.join(cap_words)
+        MAYA_PORT = int(args[1])
 
         sys.path.append(app_dir_path)
         import_stmt = 'import {0} as app_module'.format(app_module_name)
         exec(import_stmt)
 
-        app = app_module.MayaChromeGuiApp(MAYA_PORT, app_code, '{0} - Chrome App'.format(default_app_title),
-                                          app_dir_path, start_html_filename, width=800, height=600)
+        app = app_module.MayaChromeGuiApp(MAYA_PORT, app_module_filepath, width=800, height=600)
         app.launch()
 
     except:

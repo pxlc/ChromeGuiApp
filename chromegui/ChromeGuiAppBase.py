@@ -5,6 +5,7 @@ import json
 import ctypes
 import getpass
 import subprocess
+import traceback
 import logging
 
 import jinja2
@@ -236,30 +237,34 @@ class ChromeGuiAppBase(object):
 
     def start_(self):
 
-        chrome_path_by_platform = {
-            'win32': r'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe',
-        }
-        chrome_exe_path = chrome_path_by_platform.get(sys.platform, '')
+        try:
+            chrome_path_by_platform = {
+                'win32': r'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe',
+            }
+            chrome_exe_path = chrome_path_by_platform.get(sys.platform, '')
 
-        chrome_data_dir = os.path.join(self.config.get('user_temp_root', os.getenv('TEMP')),
-                                       '_chrome_app_user_data')
-        cmd_arr = [
-            chrome_exe_path,
-            '--allow-file-access-from-files',
-            '--window-size={w},{h}'.format(w=self.width, h=self.height),
-            '--user-data-dir={0}'.format(chrome_data_dir),
-            '--app=file:///{0}'.format(self.generate_html_file(self.start_html_fname)),
-        ]
+            chrome_data_dir = os.path.join(self.config.get('user_temp_root', os.getenv('TEMP')),
+                                           '_chrome_app_user_data')
+            cmd_arr = [
+                chrome_exe_path,
+                '--allow-file-access-from-files',
+                '--window-size={w},{h}'.format(w=self.width, h=self.height),
+                '--user-data-dir={0}'.format(chrome_data_dir),
+                '--app=file:///{0}'.format(self.generate_html_file(self.start_html_fname)),
+            ]
 
-        if sys.platform == 'win32':
-            SEM_NOGPFAULTERRORBOX = 0x0002 # From MSDN
-            ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX);
-            CREATE_NO_WINDOW = 0x08000000 # From Windows API
-            subprocess_flags = CREATE_NO_WINDOW
-        else:
-            subprocess_flags = 0
-            
-        self.chrome_process = subprocess.Popen(cmd_arr, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                               creationflags=subprocess_flags)
-        self.ws_server.run_forever()
+            if sys.platform == 'win32':
+                SEM_NOGPFAULTERRORBOX = 0x0002 # From MSDN
+                ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX);
+                CREATE_NO_WINDOW = 0x08000000 # From Windows API
+                subprocess_flags = CREATE_NO_WINDOW
+            else:
+                subprocess_flags = 0
+                
+            self.chrome_process = subprocess.Popen(cmd_arr, creationflags=subprocess_flags)
+            self.ws_server.run_forever()
+        except:
+            self.error('')
+            self.error(traceback.format_exc())
+            self.error('')
 

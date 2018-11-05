@@ -1,7 +1,7 @@
 # -------------------------------------------------------------------------------
 # MIT License
 #
-# Copyright (c) 2018 pxlc@github
+# Copyright (c) 2018 pxlc
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -30,63 +30,53 @@ import traceback
 
 import jinja2
 
+os.environ['PXLC_CHROMEGUI_ROOT'] = os.path.sep.join(os.path.realpath(__file__).replace('\\','/').split('/')[:-3])
 
-CHROMEGUI_ROOT = os.path.sep.join(os.path.realpath(__file__).replace('\\','/').split('/')[:-3])
+CHROMEGUI_ROOT = os.getenv('PXLC_CHROMEGUI_ROOT')
+
 sys.path.append(CHROMEGUI_ROOT)
-
 import chromegui
 
 
 class MayaChromeGuiApp(chromegui.MayaChromeGuiAppBase):
 
-    def __init__(self, app_short_name, app_title_label, app_dir_path, start_html_filename, width=480, height=600):
+    def __init__(self, maya_port, app_module_path, width=480, height=600, start_html_filename='',
+                 template_dirpath='', config_filepath='', log_to_shell=False, log_level_str=''):
 
-        super(MayaChromeGuiApp, self).__init__(app_short_name, app_title_label, app_dir_path, width, height)
+        super(MayaChromeGuiApp, self).__init__(maya_port, app_module_path, width=width, height=height,
+                                               template_dirpath=template_dirpath, config_filepath=config_filepath,
+                                               log_to_shell=log_to_shell, log_level_str=log_level_str)
 
-        self.start_html_fname = start_html_filename
+        self.start_html_fname = start_html_filename if start_html_filename else self.auto_template_filename()
 
-        self.template_env = jinja2.Environment(loader=jinja2.FileSystemLoader(self.get_app_dir_path()))
+        # Set up your app data (and anything you will use for template data) here.
 
-        logging.basicConfig(
-            level=logging.DEBUG,
-            # format="%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s",
-            format="%(asctime)s [%(levelname)-5.5s]:  %(message)s",
-            handlers=[
-                logging.FileHandler(self.get_log_filepath()),
-                logging.StreamHandler(sys.stdout)
-            ])
-
+        self.extra_template_vars = self._setup_extra_template_vars()
         self._setup_callbacks()
 
-    def _generate_html_file(self, template_filename):
+    def _setup_extra_template_vars(self):
 
-        res_image_path = os.path.realpath( os.path.join( self.get_app_dir_path(), '../../res/images' ) )
+        res_image_path = os.path.realpath( os.path.join(CHROMEGUI_ROOT, 'res', 'images') )
+        res_icon_path = os.path.realpath( os.path.join(CHROMEGUI_ROOT, 'res', 'icons') )
 
-        template = self.template_env.get_template(template_filename)
-        html = template.render({
-            'CHROMEGUI_JS_URL': self.get_js_file_url(),
-            'PORT': str(self.get_port_num()),
-            'SESSION_ID': self.get_session_id(),
-            'WIN_TITLE': self.get_app_title(),
-            'APP_DIR_PATH': self.get_app_dir_path().replace('\\', '/'),
+        extra_vars = {
             'RES_IMG_PATH': res_image_path.replace('\\', '/'),
-        })
-        html_file_path = self.build_session_filepath('APP_START', '.html')
-        with open(html_file_path, 'w') as html_fp:
-            html_fp.write(html)
-
-        return html_file_path
-
-    def launch(self):
-
-        html_file_path = self._generate_html_file(self.start_html_fname)
-        self.start_(html_file_path)
+            'RES_ICON_PATH': res_icon_path.replace('\\', '/'),
+        }
+        return extra_vars
 
     def _setup_callbacks(self):
 
         self.add_op_handler('print_message', self.print_message)
         self.add_op_handler('user_info_submit', self.user_info_submit)
 
+    def launch(self):
+
+        self.start_()
+
+    # --------------------------------------------------------------------------------------------------------
+    #  Callback function handlers
+    # --------------------------------------------------------------------------------------------------------
     def print_message(self, op, op_data, c_app_runner):
 
         logging.info('')

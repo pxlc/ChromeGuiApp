@@ -10,10 +10,13 @@ from .ChromeGuiAppBase import ChromeGuiAppBase
 
 class MayaChromeGuiAppBase(ChromeGuiAppBase):
 
-    def __init__(self, maya_port_num, app_short_name, app_title_label, app_dir_path, width=480, height=600):
+    def __init__(self, maya_port_num, app_module_path, width=480, height=600, start_html_filename='',
+                 template_dirpath='', config_filepath='', log_to_shell=False, log_level_str=''):
 
-        super(MayaChromeGuiAppBase, self).__init__(app_short_name, app_title_label, app_dir_path, width, height)
-
+        super(MayaChromeGuiAppBase, self).__init__(app_module_path, width=width, height=height,
+                                                   template_dirpath=template_dirpath,
+                                                   config_filepath=config_filepath,
+                                                   log_to_shell=log_to_shell, log_level_str=log_level_str)
         self.maya_port_num = maya_port_num
         self.maya_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.maya_client.connect(('127.0.0.1', self.maya_port_num))
