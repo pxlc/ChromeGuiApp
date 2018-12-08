@@ -28,8 +28,6 @@ import json
 import logging
 import traceback
 
-import jinja2
-
 os.environ['PXLC_CHROMEGUI_ROOT'] = os.path.sep.join(os.path.realpath(__file__).replace('\\','/').split('/')[:-3])
 
 CHROMEGUI_ROOT = os.getenv('PXLC_CHROMEGUI_ROOT')

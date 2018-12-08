@@ -24,6 +24,7 @@
 
 import os
 import sys
+import json
 import ctypes
 import subprocess
 import traceback
@@ -37,7 +38,7 @@ sys.path.append(CHROMEGUI_ROOT)
 import chromegui
 
 
-def launch_pychrome_maya_gui(app_module_path, config_filepath=None):
+def launch_chromegui_in_maya(app_module_path, config_filepath=None):
 
     try:
         MAYA_PORT = chromegui.get_next_port_num( chromegui.load_config_file(config_filepath) )
@@ -54,13 +55,16 @@ def launch_pychrome_maya_gui(app_module_path, config_filepath=None):
         else:
             subprocess_flags = 0
 
-        cmd_and_args = ['C:/Python27/python.exe', MAYA_APP_RUNNER_SCRIPT,
-                        app_module_path, str(MAYA_PORT)]
-        DEBUG = True
+        config = chromegui.load_config_file(config_filepath)
+        python_exe = config.get('python_exe_path', {}).get(sys.platform)
+
+        cmd_and_args = [python_exe, MAYA_APP_RUNNER_SCRIPT, app_module_path, str(MAYA_PORT)]
+
+        DEBUG = False
         if DEBUG:
-            subprocess.Popen(cmd_and_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            subprocess.Popen(cmd_and_args) # , stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         else:
-            subprocess.Popen(cmd_and_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            subprocess.Popen(cmd_and_args, # stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              creationflags=subprocess_flags)
 
     except:

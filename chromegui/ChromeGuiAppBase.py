@@ -8,15 +8,17 @@ import subprocess
 import traceback
 import logging
 
+CHROMEGUI_ROOT = '/'.join(os.path.realpath(__file__).replace('\\','/').split('/')[:-2])
+sys.path.insert(0, '/'.join([ CHROMEGUI_ROOT, 'thirdparty', 'python' ]))
+
 import jinja2
 
+
 from . import util
-from .websocket import WebsocketServer
+from ._websocket_server import WebsocketServer
 from .get_js import get_js_file_url
 from .config import load_config_file
 from .util import get_next_port_num
-
-CHROMEGUI_ROOT = '/'.join(os.path.realpath(__file__).replace('\\','/').split('/')[:-2])
 
 
 class ChromeGuiAppBase(object):
@@ -40,14 +42,8 @@ class ChromeGuiAppBase(object):
 
         self.user = getpass.getuser()
 
-        # self.app_short_name = app_short_name
-        # self.app_title_label = app_title_label
-        # self.app_dir_path = app_dir_path
-
         tmpl_dir_path = template_dirpath if template_dirpath else self.app_dir_path
         self.j2_template_env = jinja2.Environment(loader=jinja2.FileSystemLoader(tmpl_dir_path))
-
-        self.port = get_next_port_num(self.config)
 
         self.session_start_dt_str = util.now_datetime_str('compact')
         self.session_id = '{a}_{u}_{dt}'.format(a=self.app_short_name, u=self.user, dt=self.session_start_dt_str)
@@ -78,6 +74,8 @@ class ChromeGuiAppBase(object):
 
         if not os.path.isdir(self.session_temp_dir_path):
             os.makedirs(self.session_temp_dir_path)
+
+        self.port = get_next_port_num(self.config)
 
         self.ws_server = WebsocketServer(self.port)
 
@@ -139,6 +137,12 @@ class ChromeGuiAppBase(object):
     def critical(self, msg):
         self.logger.critical(msg)
 
+    def post_ws_first_new_client(self, first_client, server):
+        pass
+
+    def handle_other_new_client(self, other_client, server):
+        pass
+
     def _ws_new_client(self, client, server):
 
         if not self.chrome_client:
@@ -146,20 +150,33 @@ class ChromeGuiAppBase(object):
             msg_obj = {'op': 'connection_status', 'session_id': self.session_id, 'data': {'status': 'CONNECTED'}}
             self.ws_server.send_message(client, json.dumps(msg_obj))
 
+            self.post_ws_first_new_client(client, server)
+        else:
+            self.handle_other_new_client(client, server)
+
+    # user sub-classes to override if anything needs doing before shut-down
     def clean_up(self):
+        pass
+
+    def on_chrome_gui_closing(self):
         pass
 
     def _ws_client_left(self, client, server):
 
         if client == self.chrome_client:
+
+            self.clean_up()
+            self.on_chrome_gui_closing()
             if self.chrome_process:
                 self.chrome_process.kill()
             self.ws_server.shutdown()
-            self.clean_up()
+
+    def ws_message_from_client(self, client, server, message):
+        return False
 
     def _ws_message_from_client(self, client, server, message):
 
-        if client != self.chrome_client:
+        if self.ws_message_from_client(client, server, message):
             return
 
         msg_data = {}
@@ -232,25 +249,24 @@ class ChromeGuiAppBase(object):
         if not self.chrome_client:
             # TODO: log warning/error
             return
-        msg_data = json.dumps({'op': chrome_op, 'session_id': self.session_id, 'data': chrome_op_data})
-        self.ws_server.send_message(self.chrome_client, msg_data)
+        msg_data_str = json.dumps({'op': chrome_op, 'session_id': self.session_id, 'data': chrome_op_data})
+        self.ws_server.send_message(self.chrome_client, msg_data_str)
 
     def start_(self):
 
         try:
-            chrome_path_by_platform = {
-                'win32': r'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe',
-            }
-            chrome_exe_path = chrome_path_by_platform.get(sys.platform, '')
-
+            chrome_exe_path = self.config.get('chrome_exe_path', {}).get(sys.platform)
             chrome_data_dir = os.path.join(self.config.get('user_temp_root', os.getenv('TEMP')),
                                            '_chrome_app_user_data')
+
+            extra_slash = '/' if sys.platform == 'win32' else ''
+
             cmd_arr = [
                 chrome_exe_path,
                 '--allow-file-access-from-files',
                 '--window-size={w},{h}'.format(w=self.width, h=self.height),
                 '--user-data-dir={0}'.format(chrome_data_dir),
-                '--app=file:///{0}'.format(self.generate_html_file(self.start_html_fname)),
+                '--app=file://{0}{1}'.format(extra_slash, self.generate_html_file(self.start_html_fname)),
             ]
 
             if sys.platform == 'win32':

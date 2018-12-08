@@ -22,6 +22,16 @@
 
     "port_cycle_range": {"start": 40000, "end": 42000},
 
+    "chrome_exe_path": {
+        "_type_": "single_path",
+        "win32": "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe"
+    },
+
+    "python_exe_path": {
+        "_type_": "single_path",
+        "win32": "C:/Python27/python.exe"
+    },
+
     "pythonpath_additions": {
         "_type_": "multi_path",
         "win32": [

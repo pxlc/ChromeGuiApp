@@ -90,6 +90,11 @@ def get_app_session_logfile(app_name, folder_pre='', dt_str='', temp_root=''):
 
 def get_next_port_num(config):
 
+    import json
+    print('')
+    print('[config]: %s' % json.dumps(config, indent=2, sort_keys=True))
+    print('')
+
     user_cache = config.get('user_info_cache')
     user_temp = config.get('user_temp_root')
 
