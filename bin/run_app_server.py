@@ -39,13 +39,16 @@ def usage():
     print('     -l <LOGLEVEL> | --log-level <LOGLEVEL> ... "DEBUG", "INFO", "WARNING", "ERROR", or "CRITICAL"')
     print('     -c <CONFIGFILE> | --config-file <CONFIGFILE> ... full path to config file to use')
     print('     -t <TEMPLATEDIR> | --template-dir <TEMPLATEDIR> ... full path to template directory')
+    print('     -x <WIN_X_WIDTH> | --x-width <WIN_X_WIDTH> ... specify window x-width')
+    print('     -y <WIN_Y_HEIGHT> | --y-height <WIN_Y_HEIGHT> ... specify window y-height')
     print('')
 
 
 if __name__ == '__main__':
 
-    short_opt_str = 'hsl:c:t:'
-    long_opt_list = ['help', 'shell-logging', 'log-level=', 'config-file=', 'template-dir=']
+    short_opt_str = 'hsl:c:t:x:y:'
+    long_opt_list = ['help', 'shell-logging', 'log-level=', 'config-file=', 'template-dir=',
+                     'x-width=', 'y-height=']
 
     try:
         opt_list, arg_list = getopt.getopt(sys.argv[1:], short_opt_str, long_opt_list)
@@ -60,6 +63,9 @@ if __name__ == '__main__':
     config_filepath = ''
     template_dirpath = ''
 
+    x_width = 600
+    y_height = 600
+
     for opt_flag, opt_value in opt_list:
         if opt_flag in ('-h', '--help'):
             usage()
@@ -72,6 +78,10 @@ if __name__ == '__main__':
             config_filepath = opt_value
         elif opt_flag in ('-t', '--template-dir'):
             template_dirpath = opt_value
+        elif opt_flag in ('-x', '--x-width'):
+            x_width = int(opt_value)
+        elif opt_flag in ('-y', '--y-height'):
+            y_height = int(opt_value)
 
     if len(arg_list) < 1:
         print('')
@@ -92,7 +102,7 @@ if __name__ == '__main__':
     import_stmt = 'import {0} as app_module'.format(app_module_name)
     exec(import_stmt)
 
-    app = app_module.ChromeGuiApp(app_module_path, width=800, height=600,
+    app = app_module.ChromeGuiApp(app_module_path, width=x_width, height=y_height,
                                   start_html_filename=start_html_filename, template_dirpath=template_dirpath,
                                   config_filepath=config_filepath, log_to_shell=shell_logging,
                                   log_level_str=log_level_str)
