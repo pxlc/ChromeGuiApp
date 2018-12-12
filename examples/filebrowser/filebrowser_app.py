@@ -78,9 +78,7 @@ class ChromeGuiApp(chromegui.ChromeGuiAppBase):
     # --------------------------------------------------------------------------------------------------------
     def print_message(self, op, op_data):
 
-        self.info('')
-        self.info(':: got message "{0}"'.format(op_data.get('message','')))
-        self.info('')
+        self.info(op_data.get('message',''))
 
     # def add_data_row(self, op, op_data):
     #
@@ -98,6 +96,10 @@ class ChromeGuiApp(chromegui.ChromeGuiAppBase):
     #         self.send_to_chrome('add_table_row', {'row': tabledata[next_idx], 'next_idx': next_idx+1})
 
     def filebrowse(self, op, op_data):
+
+        print('')
+        print(':: Hello?')
+        print('')
 
         resulting_op_data = chromegui.filebrowse.process(op_data)
         self.send_to_chrome(op, resulting_op_data)

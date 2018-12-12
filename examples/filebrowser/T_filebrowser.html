@@ -63,18 +63,14 @@ function data_receiver( data ) {
     if (op == "filebrowse") {
         chromegui.filebrowse.data_receiver(op_data);
     }
-
-    // if (op == "add_table_row") {
-    //     var ang_scope = angular.element(document.getElementById('id_ang_controller')).scope();
-    //     ang_scope.add_row( op_data.row, op_data.next_idx );
-    //     ang_scope.$apply();
-    // }
 }
 
 // NEEDED for FILEBROWSER
-function row_click(e, row, tabulator_table) {
-    var row_data = row.getData();
+function row_click(e, row_data, tabulator_table, is_dbl_click) {
     chromegui.pyprint("Row " + row_data.id + " has " + row_data._type + " named '" + row_data.name + "'");
+    if (is_dbl_click) {
+        chromegui.pyprint("  *** Got row double click!");
+    }
 }
 
 // NEEDED for FILEBROWSER

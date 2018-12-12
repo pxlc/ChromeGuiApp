@@ -40,8 +40,13 @@ chromegui.filebrowse.set_table_row_click_callback = function(callback_fn) {
 chromegui.filebrowse.accept = function() {
     chromegui.filebrowse.close_filebrowser();
 
+    var full_path = $("#_filebrowse_path_input").val();
+    if (chromegui.filebrowse.last_selected_row) {
+        full_path = full_path + "\\" + chromegui.filebrowse.last_selected_row.name;
+    }
+
     if (chromegui.filebrowse.callback_fn) {
-        return chromegui.filebrowse.callback_fn( $("#_filebrowse_path_input").val() );
+        return chromegui.filebrowse.callback_fn( full_path );
     }
 }
 
@@ -62,7 +67,12 @@ chromegui.filebrowse.edit_path = function() {
 chromegui.filebrowse.data_receiver = function(op_data) {
     if (op_data.sub_op == "path_check.exists") {
         if (op_data.sub_op_return == true) {
-            $("#_filebrowse_path_input").val(op_data.path);
+            var new_path = op_data.path;
+            if (op_data._type == 'file') {
+                new_path = op_data._parent_path;
+            }
+            $("#_filebrowse_path_input").val(new_path);
+            chromegui.filebrowse.item_table.setData(op_data.dir_items)
         }
         else {
             $("#_filebrowse_path_input").val(chromegui.filebrowse.prev_full_path);
@@ -108,13 +118,16 @@ chromegui.filebrowse.init = function() {
     //
     // Tabulator
     //
+    chromegui.filebrowse.row_last_click_time = null;
+    chromegui.filebrowse.last_selected_row = null;
 
     // create Tabulator on DOM element with id "_filebrowse_file_list_table"
     //
     chromegui.filebrowse.item_table = new Tabulator("#_filebrowse_file_list_table", {
-        height:205, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
-        layout:"fitColumns", //fit columns to width of table (optional)
-        columns:[ //Define Table Columns
+        height: 205, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
+        layout: "fitColumns", //fit columns to width of table (optional)
+        selectable: 1,
+        columns: [ //Define Table Columns
             {title:"Name", field:"name", width:320},
             {title:"Size", field:"size", align:"right", width:72,
                 sorter: function(a, b, aRow, bRow, column, dir, sorterParams) {
@@ -134,18 +147,31 @@ chromegui.filebrowse.init = function() {
             },
             {title:"Modified", field:"last_mod_dt"},
         ],
-        rowClick:function(e, row){ //trigger an alert message when the row is clicked
+        rowClick: function(e, row) {
+            var is_dbl_click = false;
+            var now_time = new Date().getTime();  // this is milliseconds time
+            if (chromegui.filebrowse.row_last_click_time) {
+                if (now_time - chromegui.filebrowse.row_last_click_time < 500) {
+                    is_dbl_click = true;
+                }
+            }
+            chromegui.filebrowse.row_last_click_time = now_time;
+            chromegui.filebrowse.last_selected_row = row.getData();
+
             if (chromegui.filebrowse.table_row_click_fn) {
-                chromegui.filebrowse.table_row_click_fn(e, row, chromegui.filebrowse.item_table);
+                chromegui.filebrowse.table_row_click_fn(e, row.getData(), chromegui.filebrowse.item_table,
+                                                        is_dbl_click);
             }
         },
     });
 
     //define some sample data
     var tabledata = [
+        /*
         {id:1, name:"some_file.pdf", size: "405K", _size: 405000, last_mod_dt: "2018-11-23 11:45:21", _type: "file"},
         {id:2, name:"impressive_document.md", size: "2MB", _size: 2000000, last_mod_dt: "2018-11-27 15:33:12", _type: "file"},
         {id:3, name:"OTHER_FILES", size: "", _size: 0, last_mod_dt: "2018-11-29 19:02:43", _type: "dir"},
+        */
     ];
 
     //load sample data into the table
