@@ -59,6 +59,7 @@ function data_receiver( data ) {
     var op_data = data.data;
     var session_id = data.session_id;
 
+    // NEEDED for FILEBROWSER
     if (op == "filebrowse") {
         chromegui.filebrowse.data_receiver(op_data);
     }
@@ -70,11 +71,13 @@ function data_receiver( data ) {
     // }
 }
 
+// NEEDED for FILEBROWSER
 function row_click(e, row, tabulator_table) {
     var row_data = row.getData();
     chromegui.pyprint("Row " + row_data.id + " has " + row_data._type + " named '" + row_data.name + "'");
 }
 
+// NEEDED for FILEBROWSER
 function accept_filebrowser_value( path ) {
     chromegui.pyprint("Got path: '" + path + "'");
 }
@@ -83,6 +86,7 @@ function init() {
     chromegui.init("{{ SESSION_ID }}", {{ PORT }}, chromegui.pyprint, data_receiver);
     chromegui.filebrowse.init();
 
+    // NEEDED for FILEBROWSER
     chromegui.filebrowse.set_table_row_click_callback(row_click);
     chromegui.filebrowse.set_accept_callback(accept_filebrowser_value);
 }
@@ -94,38 +98,19 @@ function init() {
 <body onload="init();" onunload="chromegui.close();">
 
 <div class="container">
-    <div class="card text-white bg-primary">
-        <div class="card-header">Card Header</div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-2">
-
-                    <div class="list-group">
-                        <a href="#" class="list-group-item list-group-item-action">C:\</a>
-                        <a href="#" class="list-group-item list-group-item-action">D:\</a>
-                        <a href="#" class="list-group-item list-group-item-action disabled">T:\</a>
-                    </div>
-
-                </div>
-                <div class="col-10">
-
-                </div>
-            </div>
-        </div>
-    </div>
+    <h1>Example use of ChromeGuiApp's File Browser component</h1>
 </div>
 
 <div class="container">
+    <!-- NEEDED for FILEBROWSER (something to open its dialog) -->
     <button type="button" class="btn btn-secondary btn-sm" onclick="chromegui.filebrowse.open_filebrowser()">
         Open File Browser
     </button>
 </div>
 
+<!-- NEEDED for FILEBROWSER -->
 {{ FILEBROWSE_HTML }}
 
-<script language="JavaScript">
-
-</script>
 
 </body>
 
