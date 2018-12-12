@@ -1,3 +1,26 @@
+# -------------------------------------------------------------------------------
+# MIT License
+#
+# Copyright (c) 2018 pxlc
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+# -------------------------------------------------------------------------------
 
 import os
 import sys
@@ -16,7 +39,7 @@ import jinja2
 
 from . import util
 from ._websocket_server import WebsocketServer
-from .get_js import get_js_file_url
+from .get_js import get_js_file_url, get_js_root_url
 from .config import load_config_file
 from .util import get_next_port_num
 
@@ -24,6 +47,7 @@ from .util import get_next_port_num
 class ChromeGuiAppBase(object):
 
     JS_FILE_URL = get_js_file_url()
+    JS_ROOT_URL = get_js_root_url()
 
     def __init__(self, app_module_filepath, width=480, height=600, template_dirpath='',
                  config_filepath='', log_to_shell=False, log_level_str=''):
@@ -106,7 +130,8 @@ class ChromeGuiAppBase(object):
         template = self.j2_template_env.get_template(template_filename)
 
         template_vars = {
-            'CHROMEGUI_JS_URL': self.get_js_file_url(),
+            'CHROMEGUI_JS_URL': self.JS_FILE_URL,
+            'CHROMEGUI_JS_ROOT': self.JS_ROOT_URL,
             'PORT': str(self.get_port_num()),
             'SESSION_ID': self.get_session_id(),
             'WIN_TITLE': self.get_app_title(),
@@ -229,9 +254,6 @@ class ChromeGuiAppBase(object):
 
     def get_log_filepath(self):
         return self.log_file
-
-    def get_js_file_url(self):
-        return self.JS_FILE_URL
 
     def build_session_filepath(self, file_suffix, file_ext):
         return '{pre}_{suf}{ext}'.format(pre=self.session_file_path_pre, suf=file_suffix, ext=file_ext)

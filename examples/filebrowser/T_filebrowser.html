@@ -41,7 +41,8 @@
 <script type="text/javascript" src="https://unpkg.com/tabulator-tables@4.0.5/dist/js/tabulator.min.js"></script>
 
 <!-- [ ChromeGuiApp ] -->
-<script type="text/javascript" src="{{ CHROMEGUI_JS_URL }}"></script>
+<script type="text/javascript" src="{{ CHROMEGUI_JS_ROOT }}/chromegui.js"></script>
+<script type="text/javascript" src="{{ CHROMEGUI_JS_ROOT }}/chromegui_filebrowse.js"></script>
 
 
 <script language="JavaScript">
@@ -49,10 +50,6 @@
 //
 // chromegui
 //
-function pyprint( message ) {
-    chromegui.to_python("print_message", {"message": "" + message});
-}
-
 function data_receiver( data ) {
     if (data.op == "message") {
         alert(data.data.msg);
@@ -63,17 +60,7 @@ function data_receiver( data ) {
     var session_id = data.session_id;
 
     if (op == "filebrowse") {
-        if (op_data.sub_op == "path_check.exists") {
-            if (op_data.sub_op_return == true) {
-                $("#fullPath").val(op_data.path);
-            }
-            else {
-                pyprint("Hello? Path no good!");
-                $("#fullPath").val(g_prev_full_path);
-                $("#pathAlert").text("Path '" + op_data.path + "' does not exist!");
-                $("#pathAlertDiv").show();
-            }
-        }
+        chromegui.filebrowse.data_receiver(op_data);
     }
 
     // if (op == "add_table_row") {
@@ -83,24 +70,21 @@ function data_receiver( data ) {
     // }
 }
 
+function row_click(e, row, tabulator_table) {
+    var row_data = row.getData();
+    chromegui.pyprint("Row " + row_data.id + " has " + row_data._type + " named '" + row_data.name + "'");
+}
+
+function accept_filebrowser_value( path ) {
+    chromegui.pyprint("Got path: '" + path + "'");
+}
+
 function init() {
-    chromegui.init("{{ SESSION_ID }}", {{ PORT }}, pyprint, data_receiver);
-}
+    chromegui.init("{{ SESSION_ID }}", {{ PORT }}, chromegui.pyprint, data_receiver);
+    chromegui.filebrowse.init();
 
-//
-// Page interaction functions
-//
-function open_filebrowser() {
-    $("#fb_modal").css("display", "block");
-}
-
-function close_filebrowser() {
-    $("#fb_modal").css("display", "none");
-}
-
-function edit_path() {
-    $("#fullPath").attr("readonly", false);
-    $("#fullPath").focus();
+    chromegui.filebrowse.set_table_row_click_callback(row_click);
+    chromegui.filebrowse.set_accept_callback(accept_filebrowser_value);
 }
 
 </script>
@@ -132,160 +116,14 @@ function edit_path() {
 </div>
 
 <div class="container">
-    <button type="button" class="btn btn-secondary btn-sm" onclick="open_filebrowser()">Open File Browser</button>
+    <button type="button" class="btn btn-secondary btn-sm" onclick="chromegui.filebrowse.open_filebrowser()">
+        Open File Browser
+    </button>
 </div>
 
-<div class="container">
-
-<!--
-<div class="modal" id="fb_modal">
--->
-<div class="modal" id="fb_modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content" style="width: 700px">
-      <div class="modal-header">
-        <h5 class="modal-title">File Browser</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="close_filebrowser()">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-      <!-- ============================================================================================== -->
-
-            <div class="row">
-                <div class="col-12">
-                    <label for="fullPath">Path:</label>
-
-                    <div class="input-group input-group-sm">
-                        <div class="input-group-prepend" onclick="edit_path();"
-                                style="cursor: pointer;">
-                            <span class="input-group-text" id="fullPathPrepend">&gt;</span>
-                        </div>
-                        <input id="fullPath" class="form-control" type="text" readonly>
-                    </div>
-
-                    <div id="pathAlertDiv" class="alert alert-danger alert-sm"
-                            style="display: none; cursor: pointer;"
-                            onclick="$('#pathAlertDiv').hide();">
-                        <span><strong>&times;</strong>&nbsp;&nbsp;</span>
-                        <span style="font-size: 150%">|</span><span>&nbsp;&nbsp;</span>
-                        <span id="pathAlert">path alert</span>
-                    </div>
-
-                </div>
-            </div>
-
-            <div class="row" style="margin-top: 10px;">
-                <div class="col-2">
-
-                    <div class="list-group">
-                        <a href="#" class="list-group-item list-group-item-action">C:\</a>
-                        <a href="#" class="list-group-item list-group-item-action">D:\</a>
-                        <a href="#" class="list-group-item list-group-item-action disabled">T:\</a>
-                    </div>
-
-                </div>
-                <div class="col-10">
-                    <div id="file_list_table"></div>
-                </div>
-            </div>
-
-      <!-- ============================================================================================== -->
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-success">OK</button>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="close_filebrowser()">
-            Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-</div>
+{{ FILEBROWSE_HTML }}
 
 <script language="JavaScript">
-// $('#fb_modal').on('show', function () {
-//       $('.modal-body',this).css({width:'auto',height:'auto', 'max-width':'100%', 'max-height':'100%'});
-// });
-
-var g_prev_full_path = "";
-
-$("#fullPath").blur(function() {
-    var full_path_el = $("#fullPath");
-    if (! full_path_el.attr("readonly")) {
-        chromegui.to_python("filebrowse", {"sub_op": "path_check.exists", "path": $("#fullPath").val()});
-        full_path_el.attr("readonly", true);
-    }
-});
-
-$("#fullPath").focus(function() {
-    var full_path_el = $("#fullPath");
-    if (! full_path_el.attr("readonly")) {
-        g_prev_full_path = full_path_el.val();
-    }
-    $('#pathAlertDiv').hide();
-});
-
-$('#fullPath').keyup(function(e){
-    var full_path_el = $("#fullPath");
-    if(e.keyCode == 13) { // ENTER key
-        // TODO: validate and accept input
-        if (! full_path_el.attr("readonly")) {
-            chromegui.to_python("filebrowse", {"sub_op": "path_check.exists", "path": $("#fullPath").val()});
-        }
-        full_path_el.attr("readonly", true);
-    }
-    else if(e.keyCode == 27) { // ESC key
-        // TODO: return the text value to previous valid value
-        full_path_el.attr("readonly", true);
-        full_path_el.val(g_prev_full_path);
-    }
-});
-
-//
-// tabulator
-//
-
-//create Tabulator on DOM element with id "example-table"
-var table = new Tabulator("#file_list_table", {
- 	height:205, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
- 	layout:"fitColumns", //fit columns to width of table (optional)
- 	columns:[ //Define Table Columns
-	 	{title:"Name", field:"name", width:320},
-	 	{title:"Size", field:"size", align:"right", width:72,
-            sorter: function(a, b, aRow, bRow, column, dir, sorterParams) {
-                // a, b - the two values being compared
-                // aRow, bRow - the row components for the values being compared (useful if you need to
-                //              access additional fields in the row data for the sort)
-                // column - the column component for the column being sorted
-                // dir - the direction of the sort ("asc" or "desc")
-                // sorterParams - sorterParams object from column definition array
-
-                var a_row_data = aRow.getData();
-                var b_row_data = bRow.getData();
-
-                var diff_size = a_row_data._size - b_row_data._size;
-                return diff_size; // you must return the difference between the two values
-            },
-        },
-	 	{title:"Modified", field:"last_mod_dt"},
- 	],
- 	rowClick:function(e, row){ //trigger an alert message when the row is clicked
- 		pyprint("Row " + row.getData().id + " Clicked!!!!");
- 	},
-});
-
-//define some sample data
-var tabledata = [
-	{id:1, name:"some_file.pdf", size: "405K", _size: 405000, last_mod_dt: "2018-11-23 11:45:21", _type: "file"},
-	{id:2, name:"impressive_document.md", size: "2MB", _size: 2000000, last_mod_dt: "2018-11-27 15:33:12", _type: "file"},
-	{id:3, name:"OTHER_FILES", size: "", _size: 0, last_mod_dt: "2018-11-29 19:02:43", _type: "dir"},
-];
-
-//load sample data into the table
-table.setData(tabledata);
 
 </script>
 

@@ -59,6 +59,7 @@ class ChromeGuiApp(chromegui.ChromeGuiAppBase):
         extra_vars = {
             'RES_IMG_PATH': res_image_path.replace('\\', '/'),
             'RES_ICON_PATH': res_icon_path.replace('\\', '/'),
+            'FILEBROWSE_HTML': chromegui.filebrowse.get_filebrowse_modal_html(),
         }
         return extra_vars
 

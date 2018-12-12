@@ -47,3 +47,11 @@ def process(op_data):
     return op_data
 
 
+def get_filebrowse_modal_html():
+
+    html_filepath = '%s/FILEBROWSE_SNIPPET.html' % os.path.dirname(os.path.abspath(__file__).replace('\\','/'))
+    with open(html_filepath, 'r') as fp:
+        html_str = fp.read()
+    return html_str
+
+

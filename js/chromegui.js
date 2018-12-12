@@ -77,3 +77,10 @@ chromegui.init = function(session_id, port_num, message_fn, data_handler_fn) {
         console.log(e)
     };
 }
+
+
+chromegui.pyprint = function( message ) {
+    chromegui.to_python("print_message", {"message": "" + message});
+}
+
+
