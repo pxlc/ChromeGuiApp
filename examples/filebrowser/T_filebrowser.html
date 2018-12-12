@@ -62,11 +62,25 @@ function data_receiver( data ) {
     var op_data = data.data;
     var session_id = data.session_id;
 
-    if (op == "add_table_row") {
-        var ang_scope = angular.element(document.getElementById('id_ang_controller')).scope();
-        ang_scope.add_row( op_data.row, op_data.next_idx );
-        ang_scope.$apply();
+    if (op == "filebrowse") {
+        if (op_data.sub_op == "path_check.exists") {
+            if (op_data.sub_op_return == true) {
+                $("#fullPath").val(op_data.path);
+            }
+            else {
+                pyprint("Hello? Path no good!");
+                $("#fullPath").val(g_prev_full_path);
+                $("#pathAlert").text("Path '" + op_data.path + "' does not exist!");
+                $("#pathAlertDiv").show();
+            }
+        }
     }
+
+    // if (op == "add_table_row") {
+    //     var ang_scope = angular.element(document.getElementById('id_ang_controller')).scope();
+    //     ang_scope.add_row( op_data.row, op_data.next_idx );
+    //     ang_scope.$apply();
+    // }
 }
 
 function init() {
@@ -149,6 +163,15 @@ function edit_path() {
                         </div>
                         <input id="fullPath" class="form-control" type="text" readonly>
                     </div>
+
+                    <div id="pathAlertDiv" class="alert alert-danger alert-sm"
+                            style="display: none; cursor: pointer;"
+                            onclick="$('#pathAlertDiv').hide();">
+                        <span><strong>&times;</strong>&nbsp;&nbsp;</span>
+                        <span style="font-size: 150%">|</span><span>&nbsp;&nbsp;</span>
+                        <span id="pathAlert">path alert</span>
+                    </div>
+
                 </div>
             </div>
 
@@ -187,27 +210,37 @@ function edit_path() {
 //       $('.modal-body',this).css({width:'auto',height:'auto', 'max-width':'100%', 'max-height':'100%'});
 // });
 
-var g_fullPath = "";
+var g_prev_full_path = "";
 
 $("#fullPath").blur(function() {
-    // TODO: validate and accept input
-    $("#fullPath").attr("readonly", true);
+    var full_path_el = $("#fullPath");
+    if (! full_path_el.attr("readonly")) {
+        chromegui.to_python("filebrowse", {"sub_op": "path_check.exists", "path": $("#fullPath").val()});
+        full_path_el.attr("readonly", true);
+    }
 });
 
 $("#fullPath").focus(function() {
-    // TODO: backup previous valid entry
-    g_fullPath = $("#fullPath").val();
+    var full_path_el = $("#fullPath");
+    if (! full_path_el.attr("readonly")) {
+        g_prev_full_path = full_path_el.val();
+    }
+    $('#pathAlertDiv').hide();
 });
 
 $('#fullPath').keyup(function(e){
+    var full_path_el = $("#fullPath");
     if(e.keyCode == 13) { // ENTER key
         // TODO: validate and accept input
-        $("#fullPath").attr("readonly", true);
+        if (! full_path_el.attr("readonly")) {
+            chromegui.to_python("filebrowse", {"sub_op": "path_check.exists", "path": $("#fullPath").val()});
+        }
+        full_path_el.attr("readonly", true);
     }
     else if(e.keyCode == 27) { // ESC key
         // TODO: return the text value to previous valid value
-        $("#fullPath").attr("readonly", true);
-        $("#fullPath").val(g_fullPath);
+        full_path_el.attr("readonly", true);
+        full_path_el.val(g_prev_full_path);
     }
 });
 
@@ -240,7 +273,7 @@ var table = new Tabulator("#file_list_table", {
 	 	{title:"Modified", field:"last_mod_dt"},
  	],
  	rowClick:function(e, row){ //trigger an alert message when the row is clicked
- 		console.log("Row " + row.getData().id + " Clicked!!!!");
+ 		pyprint("Row " + row.getData().id + " Clicked!!!!");
  	},
 });
 
