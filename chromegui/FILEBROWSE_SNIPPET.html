@@ -47,7 +47,8 @@
                                 style="cursor: pointer;">
                             <span class="input-group-text" id="_filebrowse_path_inputPrepend">&gt;</span>
                         </div>
-                        <input id="_filebrowse_path_input" class="form-control" type="text" readonly>
+                        <input id="_filebrowse_path_input" class="form-control" type="text" readonly
+                                onclick="chromegui.filebrowse.edit_path();">
                     </div>
 
                     <div id="_filebrowse_path_alert_div" class="alert alert-danger alert-sm"
@@ -65,9 +66,7 @@
                 <div class="col-2">
 
                     <div class="list-group">
-                        <a href="#" class="list-group-item list-group-item-action">C:\</a>
-                        <a href="#" class="list-group-item list-group-item-action">D:\</a>
-                        <a href="#" class="list-group-item list-group-item-action disabled">T:\</a>
+                        {ROOT_PATH_ITEMS}
                     </div>
 
                 </div>

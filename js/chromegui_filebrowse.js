@@ -60,7 +60,9 @@ chromegui.filebrowse.close_filebrowser = function() {
 
 chromegui.filebrowse.edit_path = function() {
     var path_input_el = $("#_filebrowse_path_input");
-    path_input_el.attr("readonly", false);
+    if (path_input_el.attr("readonly")) {
+        path_input_el.attr("readonly", false);
+    }
     path_input_el.focus();
 }
 
@@ -80,6 +82,13 @@ chromegui.filebrowse.data_receiver = function(op_data) {
             $("#_filebrowse_path_alert_div").show();
         }
     }
+}
+
+chromegui.filebrowse.set_root = function(root_path) {
+    var full_path_el = $("#_filebrowse_path_input");
+    full_path_el.val(root_path);
+    chromegui.to_python("filebrowse", {"sub_op": "path_check.exists", "path": full_path_el.val()});
+    full_path_el.attr("readonly", true);
 }
 
 chromegui.filebrowse.init = function() {

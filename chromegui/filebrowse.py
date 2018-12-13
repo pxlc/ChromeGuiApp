@@ -26,6 +26,7 @@ import os
 import sys
 import json
 import datetime
+import subprocess
 
 CHROMEGUI_ROOT = '/'.join(os.path.realpath(__file__).replace('\\','/').split('/')[:-2])
 sys.path.insert(0, '/'.join([ CHROMEGUI_ROOT, 'thirdparty', 'python' ]))
@@ -41,6 +42,23 @@ def human_readable_filesize(num, suffix='B'):
     return "%.1f%s%s" % (num, 'Y', suffix)
 
 
+def _get_drive_roots():
+
+    if sys.platform != 'win32':
+        return []
+
+    p = subprocess.Popen("fsutil fsinfo drives",
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    (out, err) = p.communicate()
+
+    drive_list = out.splitlines()[1].split()[1:]
+    for d in drive_list:
+        print('    %s' % d)
+
+    return drive_list
+
+
 def _get_dir_items(dir_path):
 
     dir_items = []
@@ -49,13 +67,20 @@ def _get_dir_items(dir_path):
     item_list.sort()
 
     for idx, item in enumerate(item_list):
+
         i_path = os.path.join(dir_path, item)
         i_type = 'dir' if os.path.isdir(i_path) else 'file'
+
         dt_format = '%Y-%m-%d %H:%M:%S'
+
         i_mtime_str = datetime.datetime.fromtimestamp(os.path.getmtime(i_path)).strftime(dt_format)
         i_ctime_str = datetime.datetime.fromtimestamp(os.path.getctime(i_path)).strftime(dt_format)
         i_size = os.path.getsize(i_path)
-        i_size_str = human_readable_filesize(i_size)
+
+        i_size_str = ''
+        if i_type == 'file':
+            i_size_str = human_readable_filesize(i_size)
+
         dir_items.append({
             'id': idx, 'name': item, 'size': i_size_str, '_size': i_size,
             'last_mod_dt': i_mtime_str, 'created_dt': i_ctime_str, '_type': i_type
@@ -88,11 +113,30 @@ def process(op_data):
     return result_op_data
 
 
-def get_filebrowse_modal_html():
+def _get_root_path_item_html( root_path ):
+
+    item_html_template = '''<a href="#" class="list-group-item list-group-item-action" ''' \
+                            '''onclick="chromegui.filebrowse.set_root('{0}');">{1}</a>'''
+
+    return item_html_template.format(root_path.replace('\\','/'), root_path)
+
+
+def get_filebrowse_modal_html(extra_root_path_list=[]):
 
     html_filepath = '%s/FILEBROWSE_SNIPPET.html' % os.path.dirname(os.path.abspath(__file__).replace('\\','/'))
     with open(html_filepath, 'r') as fp:
         html_str = fp.read()
+
+    root_path_list = _get_drive_roots()
+    root_path_list += extra_root_path_list
+
+    rpath_item_html_list = []
+
+    for root_path in root_path_list:
+        rpath_item_html_list.append( _get_root_path_item_html(root_path) )
+
+    join_str = '\n%s' % (24 * ' ')
+    html_str = html_str.format(ROOT_PATH_ITEMS=join_str.join(rpath_item_html_list))
     return html_str
 
 
