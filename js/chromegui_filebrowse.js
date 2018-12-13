@@ -167,8 +167,15 @@ chromegui.filebrowse.init = function() {
             chromegui.filebrowse.row_last_click_time = now_time;
             chromegui.filebrowse.last_selected_row = row.getData();
 
+            row_data = row.getData();
+            if (is_dbl_click && row_data._type == 'dir') {
+                var full_path_el = $("#_filebrowse_path_input");
+                var path = full_path_el.val().replace(/\\/g,"/") + "/" + row_data.name;
+                chromegui.filebrowse.set_root(path);
+            }
+
             if (chromegui.filebrowse.table_row_click_fn) {
-                chromegui.filebrowse.table_row_click_fn(e, row.getData(), chromegui.filebrowse.item_table,
+                chromegui.filebrowse.table_row_click_fn(e, row_data, chromegui.filebrowse.item_table,
                                                         is_dbl_click);
             }
         },
