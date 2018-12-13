@@ -46,8 +46,6 @@ class ChromeGuiApp(chromegui.ChromeGuiAppBase):
 
         self.start_html_fname = start_html_filename if start_html_filename else self.auto_template_filename()
 
-        # Set up your app data (and anything you will use for template data) here.
-
         self.extra_template_vars = self._setup_extra_template_vars()
         self._setup_callbacks()
 
@@ -66,7 +64,6 @@ class ChromeGuiApp(chromegui.ChromeGuiAppBase):
     def _setup_callbacks(self):
 
         self.add_op_handler('print_message', self.print_message)
-        # self.add_op_handler('add_data_row', self.add_data_row)
         self.add_op_handler('filebrowse', self.filebrowse)
 
     def launch(self):
@@ -80,26 +77,7 @@ class ChromeGuiApp(chromegui.ChromeGuiAppBase):
 
         self.info(op_data.get('message',''))
 
-    # def add_data_row(self, op, op_data):
-    #
-    #     tabledata = [
-    #         {'id':1, 'name':"Oli Bob", 'age':"12", 'col':"red", 'dob':""},
-    #         {'id':2, 'name':"Mary May", 'age':"1", 'col':"blue", 'dob':"14/05/1982"},
-    #         {'id':3, 'name':"Christine Lobowski", 'age':"42", 'col':"green", 'dob':"22/05/1982"},
-    #         {'id':4, 'name':"Brendon Philips", 'age':"125", 'col':"orange", 'dob':"01/08/1980"},
-    #         {'id':5, 'name':"Margret Marmajuke", 'age':"16", 'col':"yellow", 'dob':"31/01/1999"},
-    #     ]
-    #
-    #     next_idx = op_data.get('next_idx')
-    #     if next_idx is not None and next_idx < len(tabledata):
-    #         self.info('>>> sending next data row');
-    #         self.send_to_chrome('add_table_row', {'row': tabledata[next_idx], 'next_idx': next_idx+1})
-
     def filebrowse(self, op, op_data):
-
-        print('')
-        print(':: Hello?')
-        print('')
 
         resulting_op_data = chromegui.filebrowse.process(op_data)
         self.send_to_chrome(op, resulting_op_data)
