@@ -81,6 +81,10 @@ def _get_dir_items(dir_path):
         if i_type == 'file':
             i_size_str = human_readable_filesize(i_size)
 
+        if i_path == 'C:\\Documents and Settings':
+            # strange existence of this path from Python, but not accessible and not visible in Windows
+            continue
+
         dir_items.append({
             'id': idx, 'name': item, 'size': i_size_str, '_size': i_size,
             'last_mod_dt': i_mtime_str, 'created_dt': i_ctime_str, '_type': i_type
@@ -127,7 +131,7 @@ def get_filebrowse_modal_html(extra_root_path_list=[]):
     with open(html_filepath, 'r') as fp:
         html_str = fp.read()
 
-    root_path_list = _get_drive_roots()
+    root_path_list = ['..'] + _get_drive_roots()
     root_path_list += extra_root_path_list
 
     rpath_item_html_list = []

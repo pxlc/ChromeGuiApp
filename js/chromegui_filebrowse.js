@@ -69,7 +69,7 @@ chromegui.filebrowse.edit_path = function() {
 chromegui.filebrowse.data_receiver = function(op_data) {
     if (op_data.sub_op == "path_check.exists") {
         if (op_data.sub_op_return == true) {
-            var new_path = op_data.path;
+            var new_path = op_data.path.replace(/\\\\/g,"\\");
             if (op_data._type == 'file') {
                 new_path = op_data._parent_path;
             }
@@ -86,6 +86,24 @@ chromegui.filebrowse.data_receiver = function(op_data) {
 
 chromegui.filebrowse.set_root = function(root_path) {
     var full_path_el = $("#_filebrowse_path_input");
+    if (root_path == "..") {
+        var curr_path = full_path_el.val();
+        if (! curr_path ) {
+            return;
+        }
+        var bits = curr_path.replace(/\\/g,"/").replace(/\/\//g,"/").split("/");
+        if (bits.length < 3) {
+            if (bits.length == 2 && (! bits[0] || ! bits[1])) {
+                return;
+            }
+        }
+        root_path = bits.slice(0, bits.length-1).join("/");
+        if (root_path.length == 2 && root_path.charAt(1) == ":") {
+            root_path = root_path + "/";
+        }
+    }
+    chromegui.pyprint("[root_path]: " + root_path);
+
     full_path_el.val(root_path);
     chromegui.to_python("filebrowse", {"sub_op": "path_check.exists", "path": full_path_el.val()});
     full_path_el.attr("readonly", true);
@@ -94,8 +112,12 @@ chromegui.filebrowse.set_root = function(root_path) {
 chromegui.filebrowse.init = function() {
     $("#_filebrowse_path_input").blur(function() {
         var full_path_el = $("#_filebrowse_path_input");
-        if (! full_path_el.attr("readonly")) {
-            chromegui.to_python("filebrowse", {"sub_op": "path_check.exists", "path": full_path_el.val()});
+        var curr_path = full_path_el.val();
+        if (curr_path.charAt(1) == ":" && curr_path.length == 2) {
+            curr_path = curr_path + "/";
+        }
+        if (! full_path_el.attr("readonly") && curr_path) {
+            chromegui.to_python("filebrowse", {"sub_op": "path_check.exists", "path": curr_path});
             full_path_el.attr("readonly", true);
         }
     });
