@@ -1,8 +1,10 @@
 
 import os
 import sys
+import json
 import socket
 import threading
+import traceback
 import time
 import cgi
 
@@ -88,10 +90,6 @@ class MayaChromeGuiAppBase(ChromeGuiAppBase):
     def __init__(self, maya_port_num, app_module_path, width=480, height=600, start_html_filename='',
                  template_dirpath='', config_filepath='', log_to_shell=False, log_level_str=''):
 
-        super(MayaChromeGuiAppBase, self).__init__(app_module_path, width=width, height=height,
-                                                   template_dirpath=template_dirpath,
-                                                   config_filepath=config_filepath,
-                                                   log_to_shell=log_to_shell, log_level_str=log_level_str)
         self.maya_port_num = maya_port_num
         self.maya_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.maya_socket.connect(('127.0.0.1', self.maya_port_num))
@@ -99,7 +97,14 @@ class MayaChromeGuiAppBase(ChromeGuiAppBase):
         self.w_socket = None
         self.maya_client = None
 
-    def post_ws_first_new_client(self, first_client, server):
+        super(MayaChromeGuiAppBase, self).__init__(app_module_path, width=width, height=height,
+                                                   template_dirpath=template_dirpath,
+                                                   config_filepath=config_filepath,
+                                                   log_to_shell=log_to_shell, log_level_str=log_level_str)
+        self.post_ws_first_new_client()
+
+    # def post_ws_first_new_client(self, first_client, server):
+    def post_ws_first_new_client(self):
 
         self.w_socket = websocket.WebSocketApp('ws://localhost:%s/' % self.port,
                                                 on_message = _on_message,
@@ -129,10 +134,11 @@ class MayaChromeGuiAppBase(ChromeGuiAppBase):
                 fp.write(message)
             #---DEBUG
             msg_data = {}
+            data_str = str(message.encode('ASCII'))
             try:
-                msg_data = json.loads(message.encode('ASCII'))
+                msg_data = json.loads(data_str)
             except:
-                self.error("Message from Chrome not JSON format ... exception follows.")
+                self.error("[A] Message '%s' from Chrome not JSON format ... exception follows." % data_str)
                 self.error(traceback.format_exc())
                 return
             if msg_data.get('send_to_maya'):
@@ -148,7 +154,7 @@ class MayaChromeGuiAppBase(ChromeGuiAppBase):
             try:
                 msg_data = json.loads(message.encode('ASCII'))
             except:
-                self.error("Message from Chrome not JSON format ... exception follows.")
+                self.error("[B] Message from Chrome not JSON format ... exception follows.")
                 self.error(traceback.format_exc())
                 return
             if msg_data.get('send_to_chrome'):
