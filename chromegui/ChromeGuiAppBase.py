@@ -24,7 +24,9 @@ class ChromeGuiAppBase(object):
     JS_FILE_URL = get_js_file_url()
 
     def __init__(self, app_module_filepath, width=480, height=600, template_dirpath='',
-                 config_filepath='', log_to_shell=False, log_level_str=''):
+                 config_filepath='', log_to_shell=False, log_level_str='', app_temp_root=''):
+
+        self.app_temp_root = app_temp_root
 
         self.app_module_filepath = app_module_filepath.replace('\\','/')
         self.app_dir_path = os.path.dirname(self.app_module_filepath)
@@ -53,8 +55,10 @@ class ChromeGuiAppBase(object):
         self.session_id = '{a}_{u}_{dt}'.format(a=self.app_short_name, u=self.user, dt=self.session_start_dt_str)
 
         # use session_id as logger name
+        if not self.app_temp_root:
+            self.app_temp_root = self.config.get('user_temp_root', os.getenv('TEMP'))
         self.log_file = util.get_app_session_logfile(self.app_short_name, dt_str=self.session_start_dt_str,
-                                                     temp_root=self.config.get('user_temp_root',os.getenv('TEMP')))
+                                                     temp_root=self.app_temp_root)
         # make sure log directory exists
         log_dirpath = os.path.dirname(self.log_file)
         if not os.path.isdir(log_dirpath):

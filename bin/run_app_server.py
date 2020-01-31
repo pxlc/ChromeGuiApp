@@ -39,13 +39,15 @@ def usage():
     print('     -l <LOGLEVEL> | --log-level <LOGLEVEL> ... "DEBUG", "INFO", "WARNING", "ERROR", or "CRITICAL"')
     print('     -c <CONFIGFILE> | --config-file <CONFIGFILE> ... full path to config file to use')
     print('     -t <TEMPLATEDIR> | --template-dir <TEMPLATEDIR> ... full path to template directory')
+    print('     -W <window_width> | --Width <window_width> ... integer value of pixels width of window to open')
+    print('     -H <window_height> | --Height <window_height> ... integer value of pixels height of window to open')
     print('')
 
 
 if __name__ == '__main__':
 
-    short_opt_str = 'hsl:c:t:'
-    long_opt_list = ['help', 'shell-logging', 'log-level=', 'config-file=', 'template-dir=']
+    short_opt_str = 'hsl:c:t:W:H:'
+    long_opt_list = ['help', 'shell-logging', 'log-level=', 'config-file=', 'template-dir=', 'Width=', 'Height=']
 
     try:
         opt_list, arg_list = getopt.getopt(sys.argv[1:], short_opt_str, long_opt_list)
@@ -59,6 +61,8 @@ if __name__ == '__main__':
     log_level_str = 'ERROR'
     config_filepath = ''
     template_dirpath = ''
+    width = 0
+    height = 0
 
     for opt_flag, opt_value in opt_list:
         if opt_flag in ('-h', '--help'):
@@ -72,6 +76,10 @@ if __name__ == '__main__':
             config_filepath = opt_value
         elif opt_flag in ('-t', '--template-dir'):
             template_dirpath = opt_value
+        elif opt_flag in ('-W', '--Width'):
+            width = int(opt_value)
+        elif opt_flag in ('-H', '--Height'):
+            height = int(opt_value)
 
     if len(arg_list) < 1:
         print('')
@@ -92,9 +100,19 @@ if __name__ == '__main__':
     import_stmt = 'import {0} as app_module'.format(app_module_name)
     exec(import_stmt)
 
-    app = app_module.ChromeGuiApp(app_module_path, width=800, height=600,
-                                  start_html_filename=start_html_filename, template_dirpath=template_dirpath,
-                                  config_filepath=config_filepath, log_to_shell=shell_logging,
-                                  log_level_str=log_level_str)
+    options = {
+        'start_html_filename': start_html_filename,
+        'template_dirpath': template_dirpath,
+        'config_filepath': config_filepath,
+        'log_to_shell': shell_logging,
+        'log_level_str': log_level_str,
+    }
+
+    if width:
+        options['width'] = width
+    if height:
+        options['height'] = height
+
+    app = app_module.ChromeGuiApp(app_module_path, **options)
     app.launch()
 

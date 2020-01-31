@@ -26,12 +26,13 @@ var chromegui = {};
 
 chromegui.ws = null;
 
-chromegui.init = function(session_id, port_num, message_fn, data_handler_fn) {
+chromegui.init = function(session_id, port_num, message_fn, data_handler_fn, onopen_callback_fn) {
 
     chromegui.session_id = session_id;
     chromegui.port_num = port_num;
     chromegui.msg_fn = message_fn;
     chromegui.data_fn = data_handler_fn;
+    chromegui.onopen_cb_fn = onopen_callback_fn;
 
     // Connect to Web Socket
     chromegui.ws = new WebSocket("ws://localhost:" + port_num + "/");
@@ -55,6 +56,7 @@ chromegui.init = function(session_id, port_num, message_fn, data_handler_fn) {
     // Set event handlers.
     chromegui.ws.onopen = function() {
         chromegui.msg_fn("onopen");
+        chromegui.onopen_cb_fn();
     };
   
     // receiver of messages from Python
