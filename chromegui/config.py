@@ -25,7 +25,7 @@ def load_config_file(config_filepath=None):
         logging.error(traceback.format_exc())
 
     final_config_data = {}
-    for option, info in config_data.iteritems():
+    for option, info in config_data.items():
         if option == '#':
             continue  # skip comment entries
 
