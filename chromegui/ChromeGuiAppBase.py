@@ -23,10 +23,22 @@ class ChromeGuiAppBase(object):
 
     JS_FILE_URL = get_js_file_url()
 
-    def __init__(self, app_module_filepath, width=480, height=600, template_dirpath='',
-                 config_filepath='', log_to_shell=False, log_level_str='', app_temp_root=''):
+    def __init__(self, app_module_filepath, chrome_browser_path='', width=480, height=600, template_dirpath='',
+                 config_filepath='', log_to_shell=False, log_level_str='', app_temp_root='', chrome_data_path=''):
 
         self.app_temp_root = app_temp_root
+        self.chrome_browser_path = chrome_browser_path if chrome_browser_path else self._get_chrome_exe_path()
+
+        self.browser_name_tag = ''
+        self.chrome_data_path = ''
+
+        if not self.chrome_browser_path:
+            raise Exception('Chromium browser not found in common locations ... unable to run.')
+        elif not os.path.isfile(self.chrome_browser_path):
+            raise Exception('Cannot find "%s" Chromium browser on this computer ... unable to run.')
+
+        self.browser_name_tag = os.path.basename(chrome_browser_path).split('.')[0]
+        self.chrome_data_path = '%s_%s' % (chrome_data_path, self.browser_name_tag)
 
         self.app_module_filepath = app_module_filepath.replace('\\','/')
         self.app_dir_path = os.path.dirname(self.app_module_filepath)
@@ -57,6 +69,7 @@ class ChromeGuiAppBase(object):
         # use session_id as logger name
         if not self.app_temp_root:
             self.app_temp_root = self.config.get('user_temp_root', os.getenv('TEMP'))
+
         self.log_file = util.get_app_session_logfile(self.app_short_name, dt_str=self.session_start_dt_str,
                                                      temp_root=self.app_temp_root)
         # make sure log directory exists
@@ -102,6 +115,25 @@ class ChromeGuiAppBase(object):
 
         self.start_html_fname = ''
         self.extra_template_vars = {}
+
+    def _get_chrome_exe_path(self):
+
+        chrome_paths_by_platform = {
+            'win32': [
+                r'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe',
+                r'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe',
+                r'C:\Program Files\Google\Chrome\Application\chrome.exe',
+            ],
+        }
+        chrome_path_list = chrome_paths_by_platform.get(sys.platform, [])
+        chrome_path = ''
+
+        for c_path in chrome_path_list:
+            if os.path.isfile(c_path):
+                chrome_path = c_path
+                break
+
+        return chrome_path
 
     def auto_template_filename(self):
 
@@ -172,11 +204,12 @@ class ChromeGuiAppBase(object):
         except:
             # TODO: log warning/error message
             return
+
         op = msg_data.get('op')
         session_id = msg_data.get('session_id')
         op_data = msg_data.get('data', {})
 
-        if not op or not session_id or not op_data:
+        if not op or not session_id or type(op_data) is not dict:
             # TODO: log warning/error
             return
         if session_id != self.session_id:
@@ -242,13 +275,15 @@ class ChromeGuiAppBase(object):
     def start_(self):
 
         try:
-            chrome_path_by_platform = {
-                'win32': r'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe',
-            }
-            chrome_exe_path = chrome_path_by_platform.get(sys.platform, '')
+            chrome_exe_path = self.chrome_browser_path
 
-            chrome_data_dir = os.path.join(self.config.get('user_temp_root', os.getenv('TEMP')),
-                                           '_chrome_app_user_data')
+            chrome_data_dir = self.chrome_data_path if self.chrome_data_path \
+                                    else os.path.join(self.config.get('user_temp_root', os.getenv('TEMP')),
+                                                      '_chrome_app_user_data')
+
+            if not os.path.isdir(chrome_data_dir):
+                os.makedirs(chrome_data_dir)
+
             cmd_arr = [
                 chrome_exe_path,
                 '--allow-file-access-from-files',
@@ -261,7 +296,7 @@ class ChromeGuiAppBase(object):
                 SEM_NOGPFAULTERRORBOX = 0x0002 # From MSDN
                 ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX);
                 CREATE_NO_WINDOW = 0x08000000 # From Windows API
-                subprocess_flags = CREATE_NO_WINDOW
+                subprocess_flags = CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP
             else:
                 subprocess_flags = 0
                 

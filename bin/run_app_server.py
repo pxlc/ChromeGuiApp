@@ -29,10 +29,15 @@ import logging
 import getopt
 
 
+os.environ['PXLC_CHROMEGUI_ROOT'] = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
 def usage():
 
+    script = os.path.basename(os.path.abspath(__file__))
+
     print('')
-    print('  Usage: python {} [OPTIONS] <app_module_path> [ <start_html_filename> ]'.format( sys.argv[0]))
+    print('  Usage: python {} [OPTIONS] <app_module_path> [ <start_html_filename> ]'.format(script))
     print('')
     print('     -h | --help ... print this usage message')
     print('     -s | --shell-logging ... log messages to shell console as well')
@@ -44,13 +49,13 @@ def usage():
     print('')
 
 
-if __name__ == '__main__':
+def main(in_args):
 
     short_opt_str = 'hsl:c:t:W:H:'
     long_opt_list = ['help', 'shell-logging', 'log-level=', 'config-file=', 'template-dir=', 'Width=', 'Height=']
 
     try:
-        opt_list, arg_list = getopt.getopt(sys.argv[1:], short_opt_str, long_opt_list)
+        opt_list, arg_list = getopt.getopt(in_args, short_opt_str, long_opt_list)
     except getopt.GetoptError as err:
         print('')
         print(str(err))
@@ -115,4 +120,10 @@ if __name__ == '__main__':
 
     app = app_module.ChromeGuiApp(app_module_path, **options)
     app.launch()
+
+
+if __name__ == '__main__':
+
+    main(sys.argv[1:])
+
 
