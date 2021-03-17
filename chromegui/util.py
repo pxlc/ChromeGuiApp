@@ -73,9 +73,8 @@ def get_temp_path():
 
 def get_app_user_temp_path(app_name, folder_pre='', temp_root=''):
 
-    t_root = temp_root
-    if not temp_root:
-        t_root = get_temp_path()
+    t_root = temp_root if temp_root else get_temp_path()
+
     return os.path.join(t_root, '{p}{app}_{u}'.format(p=folder_pre, app=app_name, u=getpass.getuser()))
 
 
@@ -86,6 +85,14 @@ def get_app_session_logfile(app_name, folder_pre='', dt_str='', temp_root=''):
     log_filename = 'session_{0}.log'.format(dt_str)
 
     return os.path.join(get_app_user_temp_path(app_name, folder_pre, temp_root), log_filename)
+
+
+def get_app_session_log_filename(dt_str=''):
+
+    if not dt_str:
+        dt_str = now_datetime_str('compact', trim_micro=True)
+    log_filename = 'session_{0}.log'.format(dt_str)
+    return log_filename
 
 
 def get_next_port_num(config):

@@ -26,7 +26,6 @@ class ChromeGuiAppBase(object):
     def __init__(self, app_module_filepath, chrome_browser_path='', width=480, height=600, template_dirpath='',
                  config_filepath='', log_to_shell=False, log_level_str='', app_temp_root='', chrome_data_path=''):
 
-        self.app_temp_root = app_temp_root
         self.chrome_browser_path = chrome_browser_path if chrome_browser_path else self._get_chrome_exe_path()
 
         self.browser_name_tag = ''
@@ -37,8 +36,7 @@ class ChromeGuiAppBase(object):
         elif not os.path.isfile(self.chrome_browser_path):
             raise Exception('Cannot find "%s" Chromium browser on this computer ... unable to run.')
 
-        self.browser_name_tag = os.path.basename(chrome_browser_path).split('.')[0]
-        self.chrome_data_path = '%s_%s' % (chrome_data_path, self.browser_name_tag)
+        self.browser_name_tag = os.path.basename(self.chrome_browser_path).split('.')[0]
 
         self.app_module_filepath = app_module_filepath.replace('\\','/')
         self.app_dir_path = os.path.dirname(self.app_module_filepath)
@@ -50,13 +48,16 @@ class ChromeGuiAppBase(object):
         self.app_short_name = ''.join(cap_words)
         self.app_title_label = ' '.join(cap_words)  # default App Title
 
+        self.app_temp_root = app_temp_root if app_temp_root else util.get_app_user_temp_path(self.app_short_name)
+        if chrome_data_path:
+            self.chrome_data_path = '%s_%s' % (chrome_data_path, self.browser_name_tag)
+        else:
+            self.chrome_data_path = os.path.join(self.app_temp_root, '%s_browser_%s' % (self.app_short_name,
+                                                                                        self.browser_name_tag))
+
         self.config = load_config_file(config_filepath)
 
         self.user = getpass.getuser()
-
-        # self.app_short_name = app_short_name
-        # self.app_title_label = app_title_label
-        # self.app_dir_path = app_dir_path
 
         tmpl_dir_path = template_dirpath if template_dirpath else self.app_dir_path
         self.j2_template_env = jinja2.Environment(loader=jinja2.FileSystemLoader(tmpl_dir_path))
@@ -67,11 +68,14 @@ class ChromeGuiAppBase(object):
         self.session_id = '{a}_{u}_{dt}'.format(a=self.app_short_name, u=self.user, dt=self.session_start_dt_str)
 
         # use session_id as logger name
-        if not self.app_temp_root:
-            self.app_temp_root = self.config.get('user_temp_root', os.getenv('TEMP'))
+        log_filename = util.get_app_session_log_filename(dt_str=self.session_start_dt_str)
+        self.log_file = os.path.join(self.app_temp_root, '%s_logs' % self.app_short_name, log_filename)
 
-        self.log_file = util.get_app_session_logfile(self.app_short_name, dt_str=self.session_start_dt_str,
-                                                     temp_root=self.app_temp_root)
+        print('')
+        print(':: log file path: %s' % self.log_file)
+        print(':: chrome data path: %s' % self.chrome_data_path)
+        print('')
+
         # make sure log directory exists
         log_dirpath = os.path.dirname(self.log_file)
         if not os.path.isdir(log_dirpath):
