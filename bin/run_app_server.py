@@ -25,8 +25,9 @@
 import os
 import sys
 import json
-import logging
 import getopt
+import logging
+import importlib
 
 
 os.environ['PXLC_CHROMEGUI_ROOT'] = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -92,7 +93,7 @@ def main(in_args):
         usage()
         sys.exit(3)
 
-    app_module_path = os.path.realpath(arg_list[0])
+    app_module_path = os.path.abspath(arg_list[0])
 
     app_module_name = os.path.basename(app_module_path).replace('.py','')
     app_dir_path = os.path.dirname(app_module_path).replace('\\', '/')
@@ -102,8 +103,7 @@ def main(in_args):
         start_html_filename = arg_list[1]
 
     sys.path.append(app_dir_path)
-    import_stmt = 'import {0} as app_module'.format(app_module_name)
-    exec(import_stmt)
+    app_module = importlib.import_module(app_module_name)
 
     options = {
         'start_html_filename': start_html_filename,
