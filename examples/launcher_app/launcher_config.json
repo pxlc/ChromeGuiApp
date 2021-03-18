@@ -1,0 +1,33 @@
+{
+    "app_buttons": [
+        {
+            "app": "webbrowser",
+            "label": "Web Browser",
+            "icon_path": "${LAUNCHER_APP_ROOT}/icons/app_buttons/globe_64x64.png",
+            "exe_path": {
+                "win32": "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe"
+            }
+        },
+
+        {
+            "app": "calculator",
+            "label": "Calculator",
+            "icon_path": "${LAUNCHER_APP_ROOT}/icons/app_buttons/calculator_64x64.png",
+            "exe_path": {
+                "win32": "calc"
+            }
+        },
+
+        {
+            "app": "camera",
+            "label": "Camera",
+            "icon_path": "${LAUNCHER_APP_ROOT}/icons/app_buttons/camera_64x64.png",
+            "exe_path": {
+                "win32": "explorer.exe"
+            },
+            "exe_args": [
+                "shell:appsFolder\\Microsoft.WindowsCamera_8wekyb3d8bbwe!App"
+            ]
+        }
+    ]
+}
