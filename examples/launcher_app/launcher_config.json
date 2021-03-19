@@ -28,6 +28,18 @@
         },
 
         {
+            "app": "opendocumentsfolder",
+            "label": "Open Documents Folder",
+            "icon_path": "${LAUNCHER_APP_ROOT}/icons/app_buttons/opened_folder_64x64.png",
+            "exe_path": {
+                "win32": "explorer"
+            },
+            "exe_args": [
+                "${USERPROFILE}\\Documents"
+            ]
+        },
+
+        {
             "app": "camera",
             "label": "Camera",
             "icon_path": "${LAUNCHER_APP_ROOT}/icons/app_buttons/camera_64x64.png",
