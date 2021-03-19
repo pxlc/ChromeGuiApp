@@ -19,6 +19,15 @@
         },
 
         {
+            "app": "texteditor",
+            "label": "Text Editor",
+            "icon_path": "${LAUNCHER_APP_ROOT}/icons/app_buttons/edit_document_64x64.png",
+            "exe_path": {
+                "win32": "notepad"
+            }
+        },
+
+        {
             "app": "camera",
             "label": "Camera",
             "icon_path": "${LAUNCHER_APP_ROOT}/icons/app_buttons/camera_64x64.png",
