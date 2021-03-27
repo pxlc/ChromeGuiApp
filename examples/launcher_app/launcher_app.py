@@ -36,10 +36,6 @@ os.environ['LAUNCHER_APP_ROOT'] = LAUNCHER_APP_ROOT
 
 CHROMEGUI_ROOT = os.environ['PXLC_CHROMEGUI_ROOT']
 
-print('')
-print(':: ChromeGuiApp package root: %s' % CHROMEGUI_ROOT)
-print('')
-
 sys.path.insert(0, CHROMEGUI_ROOT)
 
 import chromegui  # NOTE: requires jinja2 package to be in Python environment
@@ -129,7 +125,7 @@ class ChromeGuiApp(chromegui.ChromeGuiAppBase):
                     return exe_path
             return None
 
-        elif type(exe_path_value) is str:
+        elif type(exe_path_value) in (str, unicode):
             return exe_path_value if os.path.isfile(exe_path_value) else None
 
         else:
@@ -146,9 +142,11 @@ class ChromeGuiApp(chromegui.ChromeGuiAppBase):
                 self.launcher_config_d = json.load(fp)
 
             for app_button_info in self.launcher_config_d.get('app_buttons', []):
+
                 exe_path = self._get_btn_info_exe_path(app_button_info)
                 if not exe_path:
                     continue
+
                 app_button_info['exe_path'] = exe_path
                 icon_path = os.path.expandvars(app_button_info['icon_path'])
                 btn_entry_html_str = self.BTN_HTML_TEMPLATE.format(
