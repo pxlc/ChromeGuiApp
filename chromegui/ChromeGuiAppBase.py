@@ -128,6 +128,14 @@ class ChromeGuiAppBase(object):
                 r'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe',
                 r'C:\Program Files\Google\Chrome\Application\chrome.exe',
             ],
+            'linux': [
+                '/usr/bin/chromium',
+                '/usr/bin/microsoft-edge-dev',
+            ],
+            'linux2': [
+                '/usr/bin/chromium',
+                '/usr/bin/microsoft-edge-dev',
+            ]
         }
         chrome_path_list = chrome_paths_by_platform.get(sys.platform, [])
         chrome_path = ''

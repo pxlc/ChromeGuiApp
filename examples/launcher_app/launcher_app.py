@@ -119,6 +119,22 @@ class ChromeGuiApp(chromegui.ChromeGuiAppBase):
         self.info(':: got message "{0}"'.format(op_data.get('message','')))
         self.info('')
 
+    def _get_btn_info_exe_path(self, app_button_info):
+
+        exe_path_value = app_button_info['exe_path'].get(sys.platform, None)
+
+        if type(exe_path_value) is list:
+            for exe_path in exe_path_value:
+                if os.path.isfile(exe_path):
+                    return exe_path
+            return None
+
+        elif type(exe_path_value) is str:
+            return exe_path_value if os.path.isfile(exe_path_value) else None
+
+        else:
+            return None
+
     def build_app_buttons(self, op, op_data):
 
         try:
@@ -130,6 +146,10 @@ class ChromeGuiApp(chromegui.ChromeGuiAppBase):
                 self.launcher_config_d = json.load(fp)
 
             for app_button_info in self.launcher_config_d.get('app_buttons', []):
+                exe_path = self._get_btn_info_exe_path(app_button_info)
+                if not exe_path:
+                    continue
+                app_button_info['exe_path'] = exe_path
                 icon_path = os.path.expandvars(app_button_info['icon_path'])
                 btn_entry_html_str = self.BTN_HTML_TEMPLATE.format(
                                             LABEL=app_button_info['label'],
@@ -165,9 +185,21 @@ class ChromeGuiApp(chromegui.ChromeGuiAppBase):
             # TODO: Set show environment here using your studio's environment system using show_code
 
             # Then run the application
-            cmd_and_args = [ found_app_button_info['exe_path'][sys.platform] ]
+            cmd_and_args = [ found_app_button_info['exe_path'] ]
+
             if 'exe_args' in found_app_button_info:
-                cmd_and_args += [ os.path.expandvars(arg) for arg in found_app_button_info['exe_args'] ]
+                exe_args = []
+                exe_args_value = found_app_button_info['exe_args']
+                if type(exe_args_value) is dict:
+                    exe_args = exe_args_value.get(sys.platform, None)
+                    if type(exe_args) is None:
+                        raise Exception('No arguments specified for platform "%s"' % sys.platform)
+                elif type(exe_args_value) is list:
+                    exe_args = exe_args_value
+                else:
+                    raise Exception('Only expecting either dict or list for "exe_args" key value.')
+
+                cmd_and_args += [ os.path.expandvars(arg) for arg in exe_args ]
 
             cflags = 0
             if sys.platform == 'win32':

@@ -62,13 +62,16 @@ def now_datetime_str( format='full', two_digit_year=False ):
 
 def get_temp_path():
 
-    if os.getenv('TEMP'):
-        return os.getenv('TEMP')
+    # if os.getenv('TEMP'):
+    #     return os.getenv('TEMP')
 
     if sys.platform == 'win32':
-        return os.path.join(os.getenv('USERPROFILE'), 'AppData', 'Local', 'Temp')
+        return os.path.join(os.getenv('USERPROFILE'), 'AppData', 'Local', 'Temp', 'ChromeAppGui')
 
-    return '/usr/tmp'
+    if sys.platform in ('linux2', 'linux', 'darwin'):
+        return os.path.expandvars('${HOME}/.ChromeAppGui')
+
+    raise Exception('System platform "%s" is not a supported platform.' % sys.platform)
 
 
 def get_app_user_temp_path(app_name, folder_pre='', temp_root=''):
