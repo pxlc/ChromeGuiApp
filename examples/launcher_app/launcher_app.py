@@ -31,6 +31,11 @@ import datetime
 import traceback
 import subprocess
 
+try:
+    unicode
+except:
+    unicode = str
+
 LAUNCHER_APP_ROOT = os.path.dirname(os.path.abspath(__file__)).replace('\\', '/')
 os.environ['LAUNCHER_APP_ROOT'] = LAUNCHER_APP_ROOT
 
